@@ -1,9 +1,3 @@
-/**
- * FilmFeast App
- *
- * @format
- */
-
 import React from 'react';
 import {
   ImageBackground,
@@ -15,13 +9,23 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+const backgroundImage = require('../assets/images/popcorn.jpg');
 
-const backgroundImage = require('../assets/images/popcorn.jpg'); 
+// Login Screen Component
+function LoginScreen() {
+  return (
+    <View style={styles.screenContainer}>
+      <Text style={styles.title}>Login Screen</Text>
+      <Text style={{ fontSize: 18 }}>Welcome! This is the login screen.</Text>
+    </View>
+  );
+}
 
-
-function FilmFeast(): React.JSX.Element {
+// Main Screen (FilmFeast) Component
+function FilmFeast({ navigation }: any): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
@@ -30,7 +34,10 @@ function FilmFeast(): React.JSX.Element {
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <View style={styles.content}>
           <Text style={styles.title}>FilmFeast</Text>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Login')} // Navigate to Login screen
+          >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.signUpButton]}>
@@ -42,6 +49,21 @@ function FilmFeast(): React.JSX.Element {
   );
 }
 
+// Set up the Stack Navigator
+const Stack = createStackNavigator();
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={FilmFeast} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+// Styles
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -78,6 +100,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  screenContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f4f4f4',
+  },
 });
 
-export default FilmFeast;
+export default App;
