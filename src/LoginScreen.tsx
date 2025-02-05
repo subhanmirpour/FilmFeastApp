@@ -40,12 +40,11 @@ const LoginScreen = ({ navigation }: any): React.JSX.Element => {
                         style={styles.input}
                         placeholder="Email"
                         placeholderTextColor="#ccc"
-                        keyboardType="email-address" 
+                        keyboardType="email-address"
                         autoCapitalize="none"
                         value={email}
                         onChangeText={setEmail}
                     />
-
 
                     {/* Password Input */}
                     <TextInput
@@ -53,7 +52,7 @@ const LoginScreen = ({ navigation }: any): React.JSX.Element => {
                         placeholder="Password"
                         placeholderTextColor="#ccc"
                         secureTextEntry
-                        autoCapitalize='none'
+                        autoCapitalize="none"
                         value={password}
                         onChangeText={setPassword}
                     />
@@ -70,12 +69,13 @@ const LoginScreen = ({ navigation }: any): React.JSX.Element => {
                         </LinearGradient>
                     </TouchableOpacity>
 
-                    {/* Sign Up Button with Gradient */}
-                    <TouchableOpacity activeOpacity={0.8}>
-                        <LinearGradient colors={['#007bff', '#0056b3']} style={[styles.button, styles.signUpButton]}>
-                            <Text style={styles.buttonText}>Sign Up</Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
+                    {/* Don't Have an Account? Sign Up */}
+                    <View style={styles.signupRedirect}>
+                        <Text style={styles.signupText}>Don't have an account?</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+                            <Text style={styles.signupLink}> Sign up</Text>
+                        </TouchableOpacity>
+                    </View>
 
                     {/* Back to Home */}
                     <TouchableOpacity onPress={() => navigation.navigate('Home')}>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     overlay: {
-        ...StyleSheet.absoluteFillObject, // Covers the entire screen
+        ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark overlay for better contrast
     },
     container: {
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
         color: 'orange',
-        textShadowColor: 'rgba(0, 0, 0, 0.7)', // Shadow for better readability
+        textShadowColor: 'rgba(0, 0, 0, 0.7)',
         textShadowOffset: { width: 3, height: 3 },
         textShadowRadius: 10,
     },
@@ -125,15 +125,15 @@ const styles = StyleSheet.create({
     },
     input: {
         width: 350,
-        height: 50, // Increased height for better consistency
-        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Transparent input
+        height: 50,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         borderRadius: 25,
         paddingHorizontal: 15,
         marginBottom: 15,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.5)', // Subtle white border
-        color: '#fff', // White text
+        borderColor: 'rgba(255, 255, 255, 0.5)',
+        color: '#fff',
     },
     forgotPassword: {
         color: '#ffcc00',
@@ -143,22 +143,32 @@ const styles = StyleSheet.create({
     button: {
         width: 250,
         paddingVertical: 15,
-        borderRadius: 25, // More rounded edges for modern look
+        borderRadius: 25,
         alignItems: 'center',
-        shadowColor: '#000', // Adds a slight shadow
+        shadowColor: '#000',
         shadowOffset: { width: 3, height: 3 },
         shadowOpacity: 0.3,
         shadowRadius: 5,
-        elevation: 5, // Elevation for Android
+        elevation: 5,
         marginBottom: 15,
-    },
-    signUpButton: {
-        marginTop: 10,
     },
     buttonText: {
         fontSize: 20,
         fontWeight: 'bold',
         color: 'white',
+    },
+    signupRedirect: {
+        flexDirection: 'row',
+        marginTop: 10,
+    },
+    signupText: {
+        fontSize: 16,
+        color: '#ddd',
+    },
+    signupLink: {
+        fontSize: 16,
+        color: '#ffcc00',
+        fontWeight: 'bold',
     },
     backToHome: {
         fontSize: 16,

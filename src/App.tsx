@@ -1,3 +1,5 @@
+// App.tsx
+
 import React from 'react';
 import {
   ImageBackground,
@@ -13,6 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './LoginScreen'; // Import the LoginScreen component
+import SignupScreen from './SignupScreen';
 
 const backgroundImage = require('../assets/images/redchair.jpg');
 
@@ -35,7 +38,7 @@ function FilmFeast({ navigation }: any): React.JSX.Element {
           </TouchableOpacity>
 
           {/* Sign Up Button with Gradient */}
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity onPress={() => navigation.navigate('Signup')} activeOpacity={0.8}>
             <LinearGradient colors={['#007bff', '#0056b3']} style={[styles.button, styles.signUpButton]}>
               <Text style={styles.buttonText}>Sign Up</Text>
             </LinearGradient>
@@ -55,6 +58,7 @@ function App() {
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={FilmFeast} />
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Signup" component={SignupScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
