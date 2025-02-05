@@ -9,20 +9,12 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from './LoginScreen'; // Import the LoginScreen component
 
-const backgroundImage = require('../assets/images/popcorn.jpg');
-
-// Login Screen Component
-function LoginScreen() {
-  return (
-    <View style={styles.screenContainer}>
-      <Text style={styles.title}>Login Screen</Text>
-      <Text style={{ fontSize: 18 }}>Welcome! This is the login screen.</Text>
-    </View>
-  );
-}
+const backgroundImage = require('../assets/images/redchair.jpg');
 
 // Main Screen (FilmFeast) Component
 function FilmFeast({ navigation }: any): React.JSX.Element {
@@ -34,14 +26,19 @@ function FilmFeast({ navigation }: any): React.JSX.Element {
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <View style={styles.content}>
           <Text style={styles.title}>FilmFeast</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Login')} // Navigate to Login screen
-          >
-            <Text style={styles.buttonText}>Login</Text>
+
+          {/* Login Button with Gradient */}
+          <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.8}>
+            <LinearGradient colors={['#ff7e00', '#ff5500']} style={styles.button}>
+              <Text style={styles.buttonText}>Login</Text>
+            </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.signUpButton]}>
-            <Text style={styles.buttonText}>Sign Up</Text>
+
+          {/* Sign Up Button with Gradient */}
+          <TouchableOpacity activeOpacity={0.8}>
+            <LinearGradient colors={['#007bff', '#0056b3']} style={[styles.button, styles.signUpButton]}>
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -63,7 +60,7 @@ function App() {
   );
 }
 
-// Styles
+// Styles used in the FilmFeast component
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -80,31 +77,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 32,
+    fontSize: 60,
     fontWeight: 'bold',
     marginBottom: 40,
-    color: '#ffcc00',
+    color: 'orange',
+    textShadowColor: 'rgba(0, 0, 0, 0.7)', // Shadow for better readability
+    textShadowOffset: { width: 15, height: 10 },
+    textShadowRadius: 15,
   },
   button: {
-    backgroundColor: '#ff6600',
+    width: 250,
     paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 8,
+    borderRadius: 25, // More rounded edges for modern look
+    alignItems: 'center',
+    shadowColor: '#000', // Adds a slight shadow
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5, // Elevation for Android
     marginBottom: 15,
   },
   signUpButton: {
-    backgroundColor: '#0080ff',
+    marginTop: 10,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
-  },
-  screenContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f4f4f4',
   },
 });
 
