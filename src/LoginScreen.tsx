@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
+
+
 const backgroundImage = require('../assets/images/redchair.jpg');
 
 const LoginScreen = ({ navigation }: any): React.JSX.Element => {
