@@ -32,6 +32,7 @@ const SignupScreen = ({ navigation }: any): React.JSX.Element => {
     }
 
     Alert.alert('Signup Successful', `Welcome, ${firstName}!`);
+    
     navigation.navigate('Login'); // Navigate to Login after signup
   };
 

@@ -16,6 +16,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './LoginScreen'; // Import the LoginScreen component
 import SignupScreen from './SignupScreen';
+import InstructionsScreen from './InstructionsScreen'; // Import the InstructionsScreen
 
 const backgroundImage = require('../assets/images/redchair.jpg');
 
@@ -43,6 +44,12 @@ function FilmFeast({ navigation }: any): React.JSX.Element {
               <Text style={styles.buttonText}>Sign Up</Text>
             </LinearGradient>
           </TouchableOpacity>
+
+          {/* How It Works Button */}
+          <TouchableOpacity onPress={() => navigation.navigate('Instructions')} style={styles.howItWorksButton}>
+            <Text style={styles.howItWorksText}>How It Works?</Text>
+          </TouchableOpacity>
+
         </View>
       </SafeAreaView>
     </ImageBackground>
@@ -59,6 +66,7 @@ function App() {
         <Stack.Screen name="Home" component={FilmFeast} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
+        <Stack.Screen name="Instructions" component={InstructionsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -108,6 +116,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
+  },
+  howItWorksButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'transparent',
+  },
+  howItWorksText: {
+    fontSize: 18,
+    color: 'white',
+    textDecorationLine: 'underline',
   },
 });
 
