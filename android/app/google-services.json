@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "988941149692",
+    "project_id": "filmfeast-6c121",
+    "storage_bucket": "filmfeast-6c121.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988941149692:android:67d67481be26a6b4d97e79",
+        "android_client_info": {
+          "package_name": "com.filmfeastapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFDl9lMSzgZtveU_Vh2aBO8RsUEwl7oxk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
