@@ -12,7 +12,20 @@
           "package_name": "com.filmfeastapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "988941149692-c6ambnm9gb4o10lgv1qse40bvqqr6o0i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.filmfeastapp",
+            "certificate_hash": "95fb2512c0d4d785050a10d2f6fd8910da4e8397"
+          }
+        },
+        {
+          "client_id": "988941149692-86v7hjme51v38c335s8fdf3dqq3uif99.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDFDl9lMSzgZtveU_Vh2aBO8RsUEwl7oxk"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988941149692-86v7hjme51v38c335s8fdf3dqq3uif99.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

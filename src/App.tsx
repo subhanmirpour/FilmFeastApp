@@ -1,5 +1,3 @@
-// App.tsx
-
 import React from 'react';
 import {
   ImageBackground,
@@ -14,9 +12,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './LoginScreen'; // Import the LoginScreen component
-import SignupScreen from './SignupScreen';
-import InstructionsScreen from './InstructionsScreen'; // Import the InstructionsScreen
+import InstructionsScreen from './InstructionsScreen';
 
 const backgroundImage = require('../assets/images/redchair.jpg');
 
@@ -31,17 +27,10 @@ function FilmFeast({ navigation }: any): React.JSX.Element {
         <View style={styles.content}>
           <Text style={styles.title}>FilmFeast</Text>
 
-          {/* Login Button with Gradient */}
-          <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.8}>
-            <LinearGradient colors={['#ff7e00', '#ff5500']} style={styles.button}>
-              <Text style={styles.buttonText}>Login</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Sign Up Button with Gradient */}
-          <TouchableOpacity onPress={() => navigation.navigate('Signup')} activeOpacity={0.8}>
-            <LinearGradient colors={['#007bff', '#0056b3']} style={[styles.button, styles.signUpButton]}>
-              <Text style={styles.buttonText}>Sign Up</Text>
+          {/* Get Started with Google Button */}
+          <TouchableOpacity activeOpacity={0.8}>
+            <LinearGradient colors={['#4285F4', '#34A853', '#FBBC05', '#EA4335']} style={styles.button}>
+              <Text style={styles.buttonText}>Get Started with Google</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -49,7 +38,6 @@ function FilmFeast({ navigation }: any): React.JSX.Element {
           <TouchableOpacity onPress={() => navigation.navigate('Instructions')} style={styles.howItWorksButton}>
             <Text style={styles.howItWorksText}>How It Works?</Text>
           </TouchableOpacity>
-
         </View>
       </SafeAreaView>
     </ImageBackground>
@@ -64,8 +52,6 @@ function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={FilmFeast} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Instructions" component={InstructionsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
@@ -93,24 +79,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 40,
     color: 'orange',
-    textShadowColor: 'rgba(0, 0, 0, 0.7)', // Shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: { width: 15, height: 10 },
     textShadowRadius: 15,
   },
   button: {
     width: 250,
     paddingVertical: 15,
-    borderRadius: 25, // More rounded edges for modern look
+    borderRadius: 25,
     alignItems: 'center',
-    shadowColor: '#000', // Adds a slight shadow
+    shadowColor: '#000',
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
-    elevation: 5, // Elevation for Android
+    elevation: 5,
     marginBottom: 15,
-  },
-  signUpButton: {
-    marginTop: 10,
   },
   buttonText: {
     fontSize: 20,
