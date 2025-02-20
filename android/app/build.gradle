@@ -1,7 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply plugin: 'com.google.gms.google-services'  // ✅ Keep this here
+apply plugin: 'com.google.gms.google-services' 
 
 react {
     autolinkLibrariesWithApp()
@@ -57,4 +57,3 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore'
 }
 
-apply plugin: 'com.google.gms.google-services'  // ✅ Keep this here
