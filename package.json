@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@react-native-firebase/app": "^21.10.0",
+    "@react-native-firebase/app": "^21.10.1",
     "@react-native-firebase/auth": "^21.10.0",
     "@react-native-firebase/firestore": "^21.10.0",
     "@react-native-google-signin/google-signin": "^13.1.0",

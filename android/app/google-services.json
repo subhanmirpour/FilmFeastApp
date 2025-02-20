@@ -1,20 +1,20 @@
 {
   "project_info": {
-    "project_number": "988941149692",
-    "project_id": "filmfeast-6c121",
-    "storage_bucket": "filmfeast-6c121.firebasestorage.app"
+    "project_number": "288779982989",
+    "project_id": "filmfeastapp",
+    "storage_bucket": "filmfeastapp.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:988941149692:android:67d67481be26a6b4d97e79",
+        "mobilesdk_app_id": "1:288779982989:android:be447e3b7c3823ee0a2ac4",
         "android_client_info": {
           "package_name": "com.filmfeastapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "988941149692-c6ambnm9gb4o10lgv1qse40bvqqr6o0i.apps.googleusercontent.com",
+          "client_id": "288779982989-ur1oluqeroha0nk2plv0rcvheblqqnl4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.filmfeastapp",
@@ -22,20 +22,20 @@
           }
         },
         {
-          "client_id": "988941149692-86v7hjme51v38c335s8fdf3dqq3uif99.apps.googleusercontent.com",
+          "client_id": "288779982989-vd2citok1a4h69e4pm2rihg76q71c9no.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDFDl9lMSzgZtveU_Vh2aBO8RsUEwl7oxk"
+          "current_key": "AIzaSyBNUiToWyi4gWYvQX6nWsUQPKoJNmIB9DI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "988941149692-86v7hjme51v38c335s8fdf3dqq3uif99.apps.googleusercontent.com",
+              "client_id": "288779982989-vd2citok1a4h69e4pm2rihg76q71c9no.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
