@@ -18,6 +18,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
+import SwipingScreen from './SwipingScreen';
 import InstructionsScreen from './InstructionsScreen';
 import Dashboard from './Dashboard'; // Import the new Dashboard screen
 import LinearGradient from 'react-native-linear-gradient';
@@ -116,6 +117,7 @@ function App() {
         <Stack.Screen name="Home" component={FilmFeast} />
         <Stack.Screen name="Instructions" component={InstructionsScreen} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
+        <Stack.Screen name="SwipingScreen" component={SwipingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
