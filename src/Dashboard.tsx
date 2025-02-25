@@ -45,12 +45,12 @@ function DashboardScreen() {
       <View style={styles.container}>
         {/* Profile Picture */}
         <TouchableOpacity onPress={() => setSidebarVisible(true)} style={styles.profileContainer}>
-          <Image 
+          <Image
             source={user?.photoURL ? { uri: user.photoURL } : require('../assets/images/profile.jpg')}
-            style={styles.profilePic} 
+            style={styles.profilePic}
           />
         </TouchableOpacity>
-        
+
         {/* Sidebar Modal */}
         <Modal
           animationType="slide"
@@ -95,12 +95,13 @@ function DashboardScreen() {
             </TouchableOpacity>
           </View>
         </Modal>
-        
+
         {/* Dashboard Options */}
         <Text style={styles.title}>Choose an Option:</Text>
-        <TouchableOpacity style={styles.optionButton}>
+        <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate("SwipingScreen")}>
           <Text style={styles.optionText}>Help me decide Movie</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.optionButton}>
           <Text style={styles.optionText}>Help me decide Food</Text>
         </TouchableOpacity>
