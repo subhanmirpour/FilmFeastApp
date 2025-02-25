@@ -1,7 +1,9 @@
 // @ts-nocheck
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { 
+  Alert,
+  Animated,
   Image, 
   ImageBackground, 
   SafeAreaView, 
@@ -10,20 +12,20 @@ import {
   Text, 
   TouchableOpacity, 
   useColorScheme, 
-  View, 
-  Animated, 
-  Alert 
+  View
 } from 'react-native';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-
-import SwipingScreen from './SwipingScreen';
-import InstructionsScreen from './InstructionsScreen';
-import Dashboard from './Dashboard'; // Import the new Dashboard screen
 import LinearGradient from 'react-native-linear-gradient';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { getAuth, signInWithCredential, GoogleAuthProvider } from '@react-native-firebase/auth';
+import { GOOGLE_WEB_CLIENT_ID } from '@env';
+
+// Screens
+import SwipingScreen from './SwipingScreen';
+import InstructionsScreen from './InstructionsScreen';
+import Dashboard from './Dashboard';
 
 // Import images
 const backgroundImage = require('../assets/images/redchair.jpg');
@@ -43,34 +45,28 @@ async function onGoogleButtonPress(navigation) {
   try {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const signInResult = await GoogleSignin.signIn();
-    let idToken = signInResult.data?.idToken || signInResult.idToken;
+    const idToken = signInResult.data?.idToken || signInResult.idToken;
 
-    if (!idToken) {
-      throw new Error('No ID token found');
-    }
+    if (!idToken) throw new Error('No ID token found');
 
     const googleCredential = GoogleAuthProvider.credential(idToken);
     const userCredential = await signInWithCredential(auth, googleCredential);
 
     console.log('User signed in:', userCredential.user);
     Alert.alert('Sign In Successful', `Welcome, ${userCredential.user.displayName || 'User'}!`);
-
-    // Navigate to Dashboard after login
     navigation.navigate('Dashboard');
-
-    return userCredential;
   } catch (error) {
     console.log('Google Sign-In Error:', error);
     Alert.alert('Sign In Failed', 'An error occurred while signing in. Please try again.');
   }
 }
 
-// Main Screen (FilmFeast) Component
+// Main Screen Component
 function FilmFeast({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark';
-  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1500,
@@ -80,10 +76,7 @@ function FilmFeast({ navigation }) {
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
-      <LinearGradient
-        colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']}
-        style={styles.overlay}
-      />
+      <LinearGradient colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']} style={styles.overlay} />
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <View style={styles.content}>
@@ -105,10 +98,8 @@ function FilmFeast({ navigation }) {
 const Stack = createStackNavigator();
 
 function App() {
-  React.useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '288779982989-vd2citok1a4h69e4pm2rihg76q71c9no.apps.googleusercontent.com',
-    });
+  useEffect(() => {
+    GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID });
   }, []);
 
   return (
@@ -180,7 +171,6 @@ const styles = StyleSheet.create({
   howItWorksButton: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: 'transparent',
   },
   howItWorksText: {
     fontSize: 18,
