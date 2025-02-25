@@ -101,3 +101,6 @@ android/.idea/
 *.sublime-workspace
 .vscode/
 .idea/
+
+# Environment
+.env
