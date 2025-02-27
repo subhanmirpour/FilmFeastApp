@@ -98,16 +98,27 @@ function DashboardScreen() {
 
         {/* Dashboard Options */}
         <Text style={styles.title}>Choose an Option:</Text>
-        <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate("SwipingScreen")}>
+        <TouchableOpacity
+          style={styles.optionButton}
+          onPress={() => navigation.navigate("SwipingScreen", { mode: "movie" })}
+        >
           <Text style={styles.optionText}>Help me decide Movie</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionButton}>
+        <TouchableOpacity
+          style={styles.optionButton}
+          onPress={() => navigation.navigate("SwipingScreen", { mode: "food" })}
+        >
           <Text style={styles.optionText}>Help me decide Food</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.optionButton}>
+
+        <TouchableOpacity
+          style={styles.optionButton}
+          onPress={() => navigation.navigate("SwipingScreen", { mode: "both" })}
+        >
           <Text style={styles.optionText}>Help me decide Both</Text>
         </TouchableOpacity>
+
       </View>
     </ImageBackground>
   );
