@@ -12,68 +12,99 @@ import {
   Image,
   ActivityIndicator
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import tmdbApi from '../services/tmdbApi';
+import { getRandomFoods } from '../services/foodData';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const backgroundImage = require('../assets/images/redchair.jpg');
 
 const SwipingScreen: React.FC = () => {
-  const [movies, setMovies] = useState<any[]>([]); 
+  // Retrieve mode from route params (mode can be 'movie', 'food', or 'both')
+  const route = useRoute();
+  const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
+
+  const [items, setItems] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [timer, setTimer] = useState(30); // ⏳ Timer state
-  const [timerActive, setTimerActive] = useState(false); // Flag to start/stop timer
-  const timerRef = useRef<NodeJS.Timeout | null>(null); // Store timer reference
+  const [timer, setTimer] = useState(30);
+  const [timerActive, setTimerActive] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const pan = useRef(new Animated.ValueXY()).current;
   const navigation = useNavigation();
   const swipeInProgress = useRef(false);
-  const moviesRef = useRef(movies);
+  const itemsRef = useRef(items);
 
-  // ✅ Keep track of movies state
+  // Keep track of items state
   useEffect(() => {
-    moviesRef.current = movies;
-  }, [movies]);
+    itemsRef.current = items;
+  }, [items]);
 
-  // ✅ Fetch Movies from TMDB API
+  // Fetch data (movies, food, or both) based on the selected mode
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchItems = async () => {
       setLoading(true);
-      const response = await tmdbApi.getPopularMovies();
-      
-      const moviesData = response.results || response;
-      console.log("Fetched Movies:", moviesData);
+      let fetchedItems: any[] = [];
   
-      setMovies(moviesData);
-  
-      if (moviesData.length > 0) {
-        const randomIndex = Math.floor(Math.random() * moviesData.length);
-        setCurrentIndex(randomIndex);
+      if (mode === 'movie') {
+        // Fetch and shuffle movies for "movie" mode
+        const response = await tmdbApi.getPopularMovies();
+        const moviesData = response.results || response;
+        if (moviesData.length > 0) {
+          for (let i = moviesData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [moviesData[i], moviesData[j]] = [moviesData[j], moviesData[i]];
+          }
+          fetchedItems = moviesData;
+        }
+        // Optionally shuffle the combined list if needed (here, it's already shuffled)
+      } else if (mode === 'food') {
+        // Use only the food items for "food" mode
+        fetchedItems = getRandomFoods();
+      } else if (mode === 'both') {
+        // For "both" mode: fetch movies and food separately, then combine
+        let moviesItems: any[] = [];
+        const response = await tmdbApi.getPopularMovies();
+        const moviesData = response.results || response;
+        if (moviesData.length > 0) {
+          // Shuffle movies list
+          for (let i = moviesData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [moviesData[i], moviesData[j]] = [moviesData[j], moviesData[i]];
+          }
+          moviesItems = moviesData;
+        }
+        const foodItems = getRandomFoods(); // Already returns a shuffled list
+        // Combine movies first, then food (no further shuffling)
+        fetchedItems = [...moviesItems, ...foodItems];
       }
   
+      setItems(fetchedItems);
+      setCurrentIndex(0);
       setLoading(false);
     };
-    fetchMovies();
-  }, []);
+  
+    fetchItems();
+  }, [mode]);
+  
 
-  // ✅ Reset pan position, swipe flag, and restart timer on swipe
+  // Reset pan position, swipe flag, and timer on each new item
   useEffect(() => {
     pan.setValue({ x: 0, y: 0 });
     swipeInProgress.current = false;
-    resetTimer(); // Reset timer when new movie appears
+    resetTimer();
   }, [currentIndex]);
 
-  // ✅ Function to start countdown timer when swiping begins
+  // Timer functions
   const startTimer = () => {
-    if (timerActive) return; // Prevent multiple timers
+    if (timerActive) return;
     setTimerActive(true);
-    setTimer(30); // Reset to 30 seconds
-
+    setTimer(30);
     timerRef.current = setInterval(() => {
       setTimer((prevTime) => {
         if (prevTime <= 1) {
-          clearInterval(timerRef.current!); // Stop timer when it hits 0
+          clearInterval(timerRef.current!);
           setTimerActive(false);
           return 0;
         }
@@ -82,16 +113,13 @@ const SwipingScreen: React.FC = () => {
     }, 1000);
   };
 
-  // ✅ Function to reset timer on swipe
   const resetTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current); // Clear existing timer
-    }
+    if (timerRef.current) clearInterval(timerRef.current);
     setTimer(30);
     setTimerActive(false);
   };
 
-  // ✅ Swipe Functionality
+  // Swipe functionality
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -101,9 +129,7 @@ const SwipingScreen: React.FC = () => {
       ),
       onPanResponderRelease: (e, gestureState) => {
         if (swipeInProgress.current) return;
-      
         let swipeDirection = null;
-      
         if (gestureState.dx > 120) {
           swipeDirection = "right";
         } else if (gestureState.dx < -120) {
@@ -111,11 +137,9 @@ const SwipingScreen: React.FC = () => {
         } else if (gestureState.dy < -120) {
           swipeDirection = "up";
         }
-      
         if (swipeDirection) {
           swipeInProgress.current = true;
-          startTimer(); // ✅ Start timer on first swipe
-      
+          startTimer();
           Animated.timing(pan, {
             toValue: { 
               x: swipeDirection === "right" ? SCREEN_WIDTH : swipeDirection === "left" ? -SCREEN_WIDTH : 0, 
@@ -124,7 +148,7 @@ const SwipingScreen: React.FC = () => {
             duration: 300,
             useNativeDriver: false,
           }).start(() => {
-            goToNextMovie();
+            goToNextItem();
           });
         } else {
           Animated.spring(pan, {
@@ -136,22 +160,27 @@ const SwipingScreen: React.FC = () => {
     })
   ).current;
 
-  // ✅ Move to Next Movie
-  const goToNextMovie = () => {
+  // Move to next item (movie or food)
+  const goToNextItem = () => {
     pan.setValue({ x: 0, y: 0 });
-    
     setCurrentIndex((prevIndex) => {
       const newIndex = prevIndex + 1;
-      if (newIndex < moviesRef.current.length) {
+      if (newIndex < itemsRef.current.length) {
         return newIndex;
       } else {
-        setMovies([]);
+        setItems([]);
         return prevIndex;
       }
     });
-
     swipeInProgress.current = false;
   };
+
+  // Determine the data for the current card (movie or food)
+  const currentItem = items[currentIndex];
+  const imageSource = currentItem?.poster_path 
+    ? { uri: `https://image.tmdb.org/t/p/w500${currentItem.poster_path}` }
+    : currentItem?.image;
+  const titleText = currentItem?.title || currentItem?.name;
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
@@ -168,29 +197,25 @@ const SwipingScreen: React.FC = () => {
           {loading ? (
             <ActivityIndicator size="large" color="#ffcc00" />
           ) : (
-            movies.length > 0 && currentIndex < movies.length ? (
+            items.length > 0 && currentIndex < items.length ? (
               <Animated.View
-                key={movies[currentIndex].id}
+                key={currentIndex}
                 style={[styles.card, pan.getLayout()]}
                 {...panResponder.panHandlers}
               >
                 <Image 
-                  source={{ 
-                    uri: movies[currentIndex].poster_path 
-                      ? `https://image.tmdb.org/t/p/w500${movies[currentIndex].poster_path}`
-                      : 'https://via.placeholder.com/500x750?text=No+Image'
-                  }}
+                  source={imageSource || { uri: 'https://via.placeholder.com/500x750?text=No+Image' }}
                   style={styles.moviePoster}
                 />
-                <Text style={styles.movieTitle}>{movies[currentIndex].title}</Text>
+                <Text style={styles.movieTitle}>{titleText}</Text>
               </Animated.View>
             ) : (
-              <Text style={styles.placeholderText}>No more movies available.</Text>
+              <Text style={styles.placeholderText}>No more items available.</Text>
             )
           )}
         </View>
 
-        {/* ✅ Timer Display */}
+        {/* Timer Display */}
         <View style={styles.timerContainer}>
           <Text style={styles.timerText}>{timer} seconds</Text>
         </View>
@@ -199,8 +224,6 @@ const SwipingScreen: React.FC = () => {
     </ImageBackground>
   );
 };
-
-// Keep your existing styles
 
 const styles = StyleSheet.create({
   background: {
@@ -239,7 +262,7 @@ const styles = StyleSheet.create({
     color: '#ffcc00',
   },
   swipeContainer: {
-    width: SCREEN_WIDTH * 1,
+    width: SCREEN_WIDTH,
     height: SCREEN_WIDTH * 1.7,
     borderRadius: 20,
     borderWidth: 2,
