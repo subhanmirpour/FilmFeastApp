@@ -65,20 +65,23 @@ const SwipingScreen: React.FC = () => {
         const response = await tmdbApi.getPopularMovies();
         const moviesData = response.results || response;
         if (moviesData.length > 0) {
+          // Use all movies or you could also slice here if desired
           fetchedItems = shuffleArray(moviesData);
         }
       } else if (mode === 'food') {
-        fetchedItems = getRandomFoods();
+        // Limit food items to 15
+        fetchedItems = getRandomFoods().slice(0, 5);
       } else if (mode === 'both') {
-        // Get movies
+        // Get movies and limit to 15
         let moviesItems: any[] = [];
         const response = await tmdbApi.getPopularMovies();
         const moviesData = response.results || response;
         if (moviesData.length > 0) {
-          moviesItems = shuffleArray(moviesData);
+          moviesItems = shuffleArray(moviesData).slice(0, 5);
         }
-        // Get food
-        const foodItems = getRandomFoods();
+        // Get foods and limit to 15
+        const foodItems = getRandomFoods().slice(0, 5);
+        // Combine movies first then food
         fetchedItems = [...moviesItems, ...foodItems];
       }
 
@@ -140,18 +143,29 @@ const SwipingScreen: React.FC = () => {
   ).current;
 
   /**
-   * Move to next item in array; if none remain, clear them out.
+   * Move to next item in array; if swipe limit reached, navigate to ResultsScreen.
    */
   const goToNextItem = () => {
     pan.setValue({ x: 0, y: 0 });
     setCurrentIndex(prevIndex => {
       const newIndex = prevIndex + 1;
-      if (newIndex < itemsRef.current.length) {
+
+      // For 'movie' or 'food' modes, stop after 15 swipes.
+      if ((mode === 'movie' || mode === 'food') && newIndex >= 5) {
+        navigation.navigate("ResultsScreen", { mode });
         return newIndex;
-      } else {
-        setItems([]);
+      }
+      // For 'both' mode, stop after 30 swipes (15 movies then 15 foods).
+      if (mode === 'both' && newIndex >= 10) {
+        navigation.navigate("ResultsScreen", { mode });
+        return newIndex;
+      }
+      // If there are no more items, navigate as well.
+      if (newIndex >= itemsRef.current.length) {
+        navigation.navigate("ResultsScreen", { mode });
         return prevIndex;
       }
+      return newIndex;
     });
     swipeInProgress.current = false;
   };

@@ -26,6 +26,7 @@ import { GOOGLE_WEB_CLIENT_ID } from '@env';
 import SwipingScreen from './SwipingScreen';
 import InstructionsScreen from './InstructionsScreen';
 import Dashboard from './Dashboard';
+import ResultsScreen from './ResultsScreen';
 
 // Import images
 const backgroundImage = require('../assets/images/redchair.jpg');
@@ -109,6 +110,7 @@ function App() {
         <Stack.Screen name="Instructions" component={InstructionsScreen} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="SwipingScreen" component={SwipingScreen} />
+        <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
