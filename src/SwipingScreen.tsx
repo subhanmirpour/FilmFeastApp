@@ -19,12 +19,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import tmdbApi from '../services/tmdbApi';
 import { getRandomFoods } from '../services/foodData';
 
+// Constants
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const backgroundImage = require('../assets/images/redchair.jpg');
 
-/**
- * Helper function to shuffle an array in place.
- */
+// Utility function to shuffle an array
 function shuffleArray(arr: any[]): any[] {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -34,28 +33,35 @@ function shuffleArray(arr: any[]): any[] {
 }
 
 const SwipingScreen: React.FC = () => {
-  // Get screen param (mode) from navigation route
+  // Navigation & Route
+  const navigation = useNavigation();
   const route = useRoute();
   const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
 
-  // State: items, current index, loading status
+  // State variables
   const [items, setItems] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [swipedItems, setSwipedItems] = useState<any[]>([]);
 
-  // Animation & references
+  // Animation & gesture handling
   const pan = useRef(new Animated.ValueXY()).current;
   const swipeInProgress = useRef(false);
-  const navigation = useNavigation();
-  const itemsRef = useRef(items);
 
+  // Refs to keep latest state values
+  const itemsRef = useRef(items);
+  const currentIndexRef = useRef(currentIndex);
+
+  // Update refs whenever state changes
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
-  /**
-   * Fetch and set items (movies, food, or both) according to mode.
-   */
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+
+  // Fetch items based on mode
   useEffect(() => {
     const fetchItems = async () => {
       setLoading(true);
@@ -64,24 +70,17 @@ const SwipingScreen: React.FC = () => {
       if (mode === 'movie') {
         const response = await tmdbApi.getPopularMovies();
         const moviesData = response.results || response;
-        if (moviesData.length > 0) {
-          // Use all movies or you could also slice here if desired
-          fetchedItems = shuffleArray(moviesData);
-        }
+        fetchedItems = shuffleArray(moviesData);
       } else if (mode === 'food') {
-        // Limit food items to 15
         fetchedItems = getRandomFoods().slice(0, 5);
       } else if (mode === 'both') {
-        // Get movies and limit to 15
         let moviesItems: any[] = [];
         const response = await tmdbApi.getPopularMovies();
         const moviesData = response.results || response;
         if (moviesData.length > 0) {
           moviesItems = shuffleArray(moviesData).slice(0, 5);
         }
-        // Get foods and limit to 15
         const foodItems = getRandomFoods().slice(0, 5);
-        // Combine movies first then food
         fetchedItems = [...moviesItems, ...foodItems];
       }
 
@@ -93,21 +92,20 @@ const SwipingScreen: React.FC = () => {
     fetchItems();
   }, [mode]);
 
-  /**
-   * Reset pan position and swipe flag whenever currentIndex changes.
-   */
+  // Reset pan and swipe flag when current index changes
   useEffect(() => {
     pan.setValue({ x: 0, y: 0 });
     swipeInProgress.current = false;
   }, [currentIndex]);
 
-  /**
-   * Set up swipe gestures with PanResponder.
-   */
+  // Create PanResponder for swipe gestures
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false }),
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
       onPanResponderRelease: (e, gestureState) => {
         if (swipeInProgress.current) return;
 
@@ -124,13 +122,17 @@ const SwipingScreen: React.FC = () => {
           swipeInProgress.current = true;
           Animated.timing(pan, {
             toValue: {
-              x: swipeDirection === 'right' ? SCREEN_WIDTH : swipeDirection === 'left' ? -SCREEN_WIDTH : 0,
+              x: swipeDirection === 'right'
+                ? SCREEN_WIDTH
+                : swipeDirection === 'left'
+                ? -SCREEN_WIDTH
+                : 0,
               y: swipeDirection === 'up' ? -SCREEN_WIDTH : 0
             },
             duration: 300,
             useNativeDriver: false
           }).start(() => {
-            goToNextItem();
+            goToNextItem(swipeDirection);
           });
         } else {
           Animated.spring(pan, {
@@ -142,25 +144,34 @@ const SwipingScreen: React.FC = () => {
     })
   ).current;
 
-  /**
-   * Move to next item in array; if swipe limit reached, navigate to ResultsScreen.
-   */
-  const goToNextItem = () => {
+  // Handle advancing to the next item after a swipe
+  const goToNextItem = (direction: string) => {
+    const currentItem = itemsRef.current[currentIndexRef.current];
+    if (currentItem) {
+      console.log('Swiped Item:', {
+        name: currentItem.title || currentItem.name,
+        type: currentItem.poster_path ? 'movie' : 'food',
+        direction: direction,
+        index: currentIndexRef.current
+      });
+      console.log('Full Item Object:', currentItem);
+      setSwipedItems(prev => [...prev, { item: currentItem, direction }]);
+    }
+
+    // Reset the pan value and update current index
     pan.setValue({ x: 0, y: 0 });
     setCurrentIndex(prevIndex => {
       const newIndex = prevIndex + 1;
 
-      // For 'movie' or 'food' modes, stop after 15 swipes.
+      // Navigate to results when a threshold is reached
       if ((mode === 'movie' || mode === 'food') && newIndex >= 5) {
         navigation.navigate("ResultsScreen", { mode });
         return newIndex;
       }
-      // For 'both' mode, stop after 30 swipes (15 movies then 15 foods).
       if (mode === 'both' && newIndex >= 10) {
         navigation.navigate("ResultsScreen", { mode });
         return newIndex;
       }
-      // If there are no more items, navigate as well.
       if (newIndex >= itemsRef.current.length) {
         navigation.navigate("ResultsScreen", { mode });
         return prevIndex;
@@ -170,7 +181,7 @@ const SwipingScreen: React.FC = () => {
     swipeInProgress.current = false;
   };
 
-  // Current card's data
+  // Determine current item details
   const currentItem = items[currentIndex];
   const imageSource = currentItem?.poster_path
     ? { uri: `https://image.tmdb.org/t/p/w500${currentItem.poster_path}` }
@@ -179,18 +190,18 @@ const SwipingScreen: React.FC = () => {
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
-      <LinearGradient colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']} style={styles.overlay} />
+      <LinearGradient
+        colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']}
+        style={styles.overlay}
+      />
       <SafeAreaView style={styles.container}>
-
-        {/* Back button */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
-
-        {/* Screen title */}
         <Text style={styles.title}>Swipe to Choose</Text>
-
-        {/* Main swipe area */}
         <View style={styles.swipeContainer}>
           {loading ? (
             <ActivityIndicator size="large" color="#ffcc00" />
@@ -201,13 +212,19 @@ const SwipingScreen: React.FC = () => {
               {...panResponder.panHandlers}
             >
               <Image
-                source={imageSource || { uri: 'https://via.placeholder.com/500x750?text=No+Image' }}
+                source={
+                  imageSource || {
+                    uri: 'https://via.placeholder.com/500x750?text=No+Image'
+                  }
+                }
                 style={styles.moviePoster}
               />
               <Text style={styles.movieTitle}>{titleText}</Text>
             </Animated.View>
           ) : (
-            <Text style={styles.placeholderText}>No more items available.</Text>
+            <Text style={styles.placeholderText}>
+              No more items available.
+            </Text>
           )}
         </View>
       </SafeAreaView>
@@ -215,6 +232,7 @@ const SwipingScreen: React.FC = () => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   background: {
     flex: 1,
