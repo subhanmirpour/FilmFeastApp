@@ -109,30 +109,30 @@ const SwipingScreen: React.FC = () => {
       onPanResponderRelease: (e, gestureState) => {
         if (swipeInProgress.current) return;
 
-        let swipeDirection = null;
+        let swipeAction = null;
         if (gestureState.dx > 120) {
-          swipeDirection = 'right';
+          swipeAction = "wantToWatch"; // Swipe Right
         } else if (gestureState.dx < -120) {
-          swipeDirection = 'left';
+          swipeAction = "dontWantToWatch"; // Swipe Left
         } else if (gestureState.dy < -120) {
-          swipeDirection = 'up';
+          swipeAction = "Skip"; // Swipe Up
         }
 
-        if (swipeDirection) {
+        if (swipeAction) {
           swipeInProgress.current = true;
           Animated.timing(pan, {
             toValue: {
-              x: swipeDirection === 'right'
+              x: swipeAction === "wantToWatch"
                 ? SCREEN_WIDTH
-                : swipeDirection === 'left'
+                : swipeAction === "dontWantToWatch"
                 ? -SCREEN_WIDTH
                 : 0,
-              y: swipeDirection === 'up' ? -SCREEN_WIDTH : 0
+              y: swipeAction === "Skip" ? -SCREEN_WIDTH : 0
             },
             duration: 300,
             useNativeDriver: false
           }).start(() => {
-            goToNextItem(swipeDirection);
+            goToNextItem(swipeAction);
           });
         } else {
           Animated.spring(pan, {
@@ -145,17 +145,17 @@ const SwipingScreen: React.FC = () => {
   ).current;
 
   // Handle advancing to the next item after a swipe
-  const goToNextItem = (direction: string) => {
+  const goToNextItem = (swipeAction: string) => {
     const currentItem = itemsRef.current[currentIndexRef.current];
     if (currentItem) {
       console.log('Swiped Item:', {
         name: currentItem.title || currentItem.name,
         type: currentItem.poster_path ? 'movie' : 'food',
-        direction: direction,
+        action: swipeAction,
         index: currentIndexRef.current
       });
       console.log('Full Item Object:', currentItem);
-      setSwipedItems(prev => [...prev, { item: currentItem, direction }]);
+      setSwipedItems(prev => [...prev, { item: currentItem, action: swipeAction }]);
     }
 
     // Reset the pan value and update current index
@@ -231,6 +231,7 @@ const SwipingScreen: React.FC = () => {
     </ImageBackground>
   );
 };
+
 
 // Styles
 const styles = StyleSheet.create({
