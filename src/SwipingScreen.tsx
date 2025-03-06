@@ -16,12 +16,21 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 
+// 1) Import modular Firebase functions
+import { initializeApp } from '@react-native-firebase/app';
+import { getFirestore, collection, addDoc } from '@react-native-firebase/firestore';
+
 import tmdbApi from '../services/tmdbApi';
 import { getRandomFoods } from '../services/foodData';
 
-// Constants
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const backgroundImage = require('../assets/images/redchair.jpg');
+
+// With google-services.json in place, you do not need a firebaseConfig.
+// React Native Firebase auto-initializes using your native config.
+// However, if needed, you can initialize the app like this:
+const app = initializeApp();
+const db = getFirestore(app);
 
 // Utility function to shuffle an array
 function shuffleArray(arr: any[]): any[] {
@@ -33,26 +42,21 @@ function shuffleArray(arr: any[]): any[] {
 }
 
 const SwipingScreen: React.FC = () => {
-  // Navigation & Route
   const navigation = useNavigation();
   const route = useRoute();
   const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
 
-  // State variables
   const [items, setItems] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [swipedItems, setSwipedItems] = useState<any[]>([]);
 
-  // Animation & gesture handling
   const pan = useRef(new Animated.ValueXY()).current;
   const swipeInProgress = useRef(false);
 
-  // Refs to keep latest state values
   const itemsRef = useRef(items);
   const currentIndexRef = useRef(currentIndex);
 
-  // Update refs whenever state changes
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
@@ -61,7 +65,7 @@ const SwipingScreen: React.FC = () => {
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
 
-  // Fetch items based on mode
+  // Fetch items based on the mode
   useEffect(() => {
     const fetchItems = async () => {
       setLoading(true);
@@ -92,7 +96,6 @@ const SwipingScreen: React.FC = () => {
     fetchItems();
   }, [mode]);
 
-  // Reset pan and swipe flag when current index changes
   useEffect(() => {
     pan.setValue({ x: 0, y: 0 });
     swipeInProgress.current = false;
@@ -111,11 +114,11 @@ const SwipingScreen: React.FC = () => {
 
         let swipeAction = null;
         if (gestureState.dx > 120) {
-          swipeAction = "wantToWatch"; // Swipe Right
+          swipeAction = "wantToWatch";
         } else if (gestureState.dx < -120) {
-          swipeAction = "dontWantToWatch"; // Swipe Left
+          swipeAction = "dontWantToWatch";
         } else if (gestureState.dy < -120) {
-          swipeAction = "Skip"; // Swipe Up
+          swipeAction = "Skip";
         }
 
         if (swipeAction) {
@@ -144,8 +147,8 @@ const SwipingScreen: React.FC = () => {
     })
   ).current;
 
-  // Handle advancing to the next item after a swipe
-  const goToNextItem = (swipeAction: string) => {
+  // Advance to the next item and log the swiped item in Firestore using the modular API.
+  const goToNextItem = async (swipeAction: string) => {
     const currentItem = itemsRef.current[currentIndexRef.current];
     if (currentItem) {
       console.log('Swiped Item:', {
@@ -156,14 +159,25 @@ const SwipingScreen: React.FC = () => {
       });
       console.log('Full Item Object:', currentItem);
       setSwipedItems(prev => [...prev, { item: currentItem, action: swipeAction }]);
+
+      try {
+        // Using the new modular API:
+        const swipedItemsRef = collection(db, 'users', 'testUser', 'swipedItems');
+        await addDoc(swipedItemsRef, {
+          item: currentItem,
+          action: swipeAction,
+          timestamp: new Date().toISOString(),
+        });
+        console.log('Successfully added to Firestore!');
+      } catch (error) {
+        console.error('Error adding document: ', error);
+      }
     }
 
-    // Reset the pan value and update current index
+    // Reset pan value and update current index
     pan.setValue({ x: 0, y: 0 });
     setCurrentIndex(prevIndex => {
       const newIndex = prevIndex + 1;
-
-      // Navigate to results when a threshold is reached
       if ((mode === 'movie' || mode === 'food') && newIndex >= 5) {
         navigation.navigate("ResultsScreen", { mode });
         return newIndex;
@@ -181,7 +195,6 @@ const SwipingScreen: React.FC = () => {
     swipeInProgress.current = false;
   };
 
-  // Determine current item details
   const currentItem = items[currentIndex];
   const imageSource = currentItem?.poster_path
     ? { uri: `https://image.tmdb.org/t/p/w500${currentItem.poster_path}` }
@@ -232,8 +245,6 @@ const SwipingScreen: React.FC = () => {
   );
 };
 
-
-// Styles
 const styles = StyleSheet.create({
   background: {
     flex: 1,
