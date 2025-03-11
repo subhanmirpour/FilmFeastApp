@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "288779982989",
+    "project_id": "filmfeastapp",
+    "storage_bucket": "filmfeastapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288779982989:android:be447e3b7c3823ee0a2ac4",
+        "android_client_info": {
+          "package_name": "com.filmfeastapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "288779982989-ur1oluqeroha0nk2plv0rcvheblqqnl4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.filmfeastapp",
+            "certificate_hash": "95fb2512c0d4d785050a10d2f6fd8910da4e8397"
+          }
+        },
+        {
+          "client_id": "288779982989-vd2citok1a4h69e4pm2rihg76q71c9no.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNUiToWyi4gWYvQX6nWsUQPKoJNmIB9DI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "288779982989-vd2citok1a4h69e4pm2rihg76q71c9no.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
