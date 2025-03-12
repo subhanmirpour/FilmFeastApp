@@ -1,73 +1,69 @@
+// @ts-nocheck
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Layout, Text, Button, Card } from '@ui-kitten/components';
 import LinearGradient from 'react-native-linear-gradient';
 
 const InstructionsScreen = () => {
   const navigation = useNavigation();
 
   return (
-    <LinearGradient colors={['#1c1c1c', '#333']} style={styles.gradient}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>🎬 Welcome to FilmFeast!</Text>
-        <Text style={styles.description}>
+    <LinearGradient colors={['#1c1c1c', '#333']} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: 20, alignItems: 'center' }}>
+        <Text category="h1" style={styles.title}>🎬 Welcome to FilmFeast!</Text>
+        <Text category="p1" style={styles.description}>
           Swipe, discover, and enjoy! FilmFeast helps you find the perfect movie and food pairing, whether you're solo or with friends.
         </Text>
-        <View style={styles.section}>
-          <Text style={styles.subtitle}>1️⃣ Get Started</Text>
-          <Text style={styles.text}>Sign up or log in to save your preferences and track recommendations.</Text>
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.subtitle}>🎥 Single-Player Mode</Text>
-          <Text style={styles.text}>Swipe right 👍 to like, left 👎 to skip, up ⬆️ if you haven’t seen it.</Text>
-          <Text style={styles.text}>After 30 seconds, we’ll recommend a movie based on your choices.</Text>
-          <Text style={styles.text}>Then, swipe for food recommendations the same way!</Text>
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.subtitle}>👥 Multiplayer Mode</Text>
-          <Text style={styles.text}>Create or join a group room with a unique code.</Text>
-          <Text style={styles.text}>Everyone swipes on the same movies for 30 seconds.</Text>
-          <Text style={styles.text}>The app finds the best match for the group.</Text>
-          <Text style={styles.text}>Repeat the process for food recommendations!</Text>
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.subtitle}>🍿 Enjoy Your Night!</Text>
-          <Text style={styles.text}>Let FilmFeast handle the choices—sit back, relax, and enjoy your movie & meal! 🍔</Text>
-        </View>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
-          <Text style={styles.buttonText}>← Back</Text>
-        </TouchableOpacity>
+
+        <Card style={styles.card}>
+          <Text category="h5" style={styles.subtitle}>1️⃣ Get Started</Text>
+          <Text category="p2">Sign up or log in to save your preferences and track recommendations.</Text>
+        </Card>
+
+        <Card style={styles.card}>
+          <Text category="h5" style={styles.subtitle}>🎥 Single-Player Mode</Text>
+          <Text category="p2">Swipe right 👍 to like, left 👎 to skip, up ⬆️ if you haven’t seen it.</Text>
+          <Text category="p2">After 30 seconds, we’ll recommend a movie based on your choices.</Text>
+          <Text category="p2">Then, swipe for food recommendations the same way!</Text>
+        </Card>
+
+        <Card style={styles.card}>
+          <Text category="h5" style={styles.subtitle}>👥 Multiplayer Mode</Text>
+          <Text category="p2">Create or join a group room with a unique code.</Text>
+          <Text category="p2">Everyone swipes on the same movies for 30 seconds.</Text>
+          <Text category="p2">The app finds the best match for the group.</Text>
+          <Text category="p2">Repeat the process for food recommendations!</Text>
+        </Card>
+
+        <Card style={styles.card}>
+          <Text category="h5" style={styles.subtitle}>🍿 Enjoy Your Night!</Text>
+          <Text category="p2">Let FilmFeast handle the choices—sit back, relax, and enjoy your movie & meal! 🍔</Text>
+        </Card>
+
+        <Button style={styles.button} onPress={() => navigation.goBack()}>
+          ← Back
+        </Button>
       </ScrollView>
     </LinearGradient>
   );
 };
 
-const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    alignItems: 'center',
-  },
+const styles = {
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    textAlign: 'center',
     color: '#ffcc00',
     marginBottom: 10,
-    textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 5,
   },
   description: {
-    fontSize: 16,
+    textAlign: 'center',
     color: '#fff',
     marginBottom: 20,
-    textAlign: 'center',
   },
-  section: {
+  card: {
     backgroundColor: '#444',
     padding: 15,
     borderRadius: 10,
@@ -80,33 +76,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
     color: '#ff7e00',
-    marginBottom: 5,
-  },
-  text: {
-    fontSize: 16,
-    color: '#ddd',
     marginBottom: 5,
   },
   button: {
     marginTop: 20,
     backgroundColor: '#ff7e00',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 3,
   },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-});
+};
 
 export default InstructionsScreen;

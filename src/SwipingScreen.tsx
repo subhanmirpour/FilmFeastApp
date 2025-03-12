@@ -1,38 +1,33 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View,
-  Text,
   StyleSheet,
   Animated,
   PanResponder,
   Dimensions,
   ImageBackground,
-  SafeAreaView,
-  TouchableOpacity,
   Image,
-  ActivityIndicator
+  TouchableOpacity,
 } from 'react-native';
+import {
+  Text,
+  Layout,
+  Spinner,
+  useTheme
+} from '@ui-kitten/components';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-
-// 1) Import modular Firebase functions
 import { initializeApp } from '@react-native-firebase/app';
 import { getFirestore, collection, addDoc } from '@react-native-firebase/firestore';
-
 import tmdbApi from '../services/tmdbApi';
 import { getRandomFoods } from '../services/foodData';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const backgroundImage = require('../assets/images/redchair.jpg');
 
-// With google-services.json in place, you do not need a firebaseConfig.
-// React Native Firebase auto-initializes using your native config.
-// However, if needed, you can initialize the app like this:
 const app = initializeApp();
 const db = getFirestore(app);
 
-// Utility function to shuffle an array
 function shuffleArray(arr: any[]): any[] {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -41,7 +36,15 @@ function shuffleArray(arr: any[]): any[] {
   return arr;
 }
 
+// Define an accessory function that returns the arrow icon
+const BackArrow = (props) => (
+  <Text {...props} style={{ color: '#ffcc00', fontSize: 28 }}>
+    ←
+  </Text>
+);
+
 const SwipingScreen: React.FC = () => {
+  const theme = useTheme();
   const navigation = useNavigation();
   const route = useRoute();
   const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
@@ -128,8 +131,8 @@ const SwipingScreen: React.FC = () => {
               x: swipeAction === "wantToWatch"
                 ? SCREEN_WIDTH
                 : swipeAction === "dontWantToWatch"
-                ? -SCREEN_WIDTH
-                : 0,
+                  ? -SCREEN_WIDTH
+                  : 0,
               y: swipeAction === "Skip" ? -SCREEN_WIDTH : 0
             },
             duration: 300,
@@ -161,7 +164,6 @@ const SwipingScreen: React.FC = () => {
       setSwipedItems(prev => [...prev, { item: currentItem, action: swipeAction }]);
 
       try {
-        // Using the new modular API:
         const swipedItemsRef = collection(db, 'users', 'testUser', 'swipedItems');
         await addDoc(swipedItemsRef, {
           item: currentItem,
@@ -174,7 +176,6 @@ const SwipingScreen: React.FC = () => {
       }
     }
 
-    // Reset pan value and update current index
     pan.setValue({ x: 0, y: 0 });
     setCurrentIndex(prevIndex => {
       const newIndex = prevIndex + 1;
@@ -207,17 +208,17 @@ const SwipingScreen: React.FC = () => {
         colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']}
         style={styles.overlay}
       />
-      <SafeAreaView style={styles.container}>
+      <Layout style={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <Text style={{ color: '#ffcc00', fontSize: 28 }}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Swipe to Choose</Text>
-        <View style={styles.swipeContainer}>
+        <Text category='h5' style={styles.title}>Swipe to Choose</Text>
+        <Layout style={styles.swipeContainer}>
           {loading ? (
-            <ActivityIndicator size="large" color="#ffcc00" />
+            <Spinner status='warning' size='giant' />
           ) : items.length > 0 && currentIndex < items.length ? (
             <Animated.View
               key={currentIndex}
@@ -232,15 +233,20 @@ const SwipingScreen: React.FC = () => {
                 }
                 style={styles.moviePoster}
               />
-              <Text style={styles.movieTitle}>{titleText}</Text>
+              <Text
+                category='h6'
+                style={[styles.movieTitle, { backgroundColor: theme['color-basic-900'] }]}
+              >
+                {titleText}
+              </Text>
             </Animated.View>
           ) : (
-            <Text style={styles.placeholderText}>
+            <Text category='h6' status='warning'>
               No more items available.
             </Text>
           )}
-        </View>
-      </SafeAreaView>
+        </Layout>
+      </Layout>
     </ImageBackground>
   );
 };
@@ -250,7 +256,6 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'center',
-    alignItems: 'center'
   },
   overlay: {
     ...StyleSheet.absoluteFillObject
@@ -259,37 +264,33 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: 20,
+    backgroundColor: 'transparent',
   },
   backButton: {
     position: 'absolute',
     top: 20,
     left: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20
-  },
-  backButtonText: {
-    fontSize: 18,
-    color: '#ffcc00',
-    fontWeight: 'bold'
+    padding: 8,
+    width: 45,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+    borderRadius: 10,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
     marginBottom: 20,
-    color: '#ffcc00'
+    color: '#ffcc00',
   },
   swipeContainer: {
     width: SCREEN_WIDTH,
-    height: SCREEN_WIDTH * 1.7,
+    height: SCREEN_WIDTH * 1.8,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#ffcc00',
-    backgroundColor: '#222',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   card: {
     width: '100%',
@@ -301,20 +302,15 @@ const styles = StyleSheet.create({
   },
   moviePoster: {
     width: '100%',
-    height: 600,
-    borderRadius: 20
+    height: 740,
+    borderRadius: 1
   },
   movieTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#ffcc00',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
     textAlign: 'center',
-    padding: 10
-  },
-  placeholderText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ffcc00'
+    padding: 10,
   }
 });
 

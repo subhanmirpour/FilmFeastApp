@@ -1,19 +1,18 @@
 // @ts-nocheck
 
 import React, { useEffect, useRef } from 'react';
-import { 
-  Alert,
+import {
   Animated,
-  Image, 
-  ImageBackground, 
-  SafeAreaView, 
-  StatusBar, 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  useColorScheme, 
-  View
+  Image,
+  ImageBackground,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+  Alert
 } from 'react-native';
+import * as eva from '@eva-design/eva';
+import { ApplicationProvider, Button, Text } from '@ui-kitten/components';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -66,30 +65,69 @@ async function onGoogleButtonPress(navigation) {
 function FilmFeast({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark';
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1500,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, [fadeAnim, slideAnim]);
+
+  // Accessory component to display the Google logo inside the Button
+  const GoogleLogo = () => (
+    <Image source={googleLogo} style={styles.googleLogo} />
+  );
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
-      <LinearGradient colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']} style={styles.overlay} />
+      <LinearGradient 
+        colors={['rgba(0,0,0,0.7)', 'rgba(0,0,0,0.3)']} 
+        style={styles.overlay} 
+      />
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <View style={styles.content}>
-          <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>FilmFeast</Animated.Text>
-          <TouchableOpacity style={styles.googleButton} activeOpacity={0.8} onPress={() => onGoogleButtonPress(navigation)}>
-            <Image source={googleLogo} style={styles.googleLogo} />
-            <Text style={styles.googleButtonText}>Get Started with Google</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Instructions')} style={styles.howItWorksButton}>
-            <Text style={styles.howItWorksText}>How It Works?</Text>
-          </TouchableOpacity>
-        </View>
+        <StatusBar barStyle="light-content" />
+        
+        {/* No Layout component - directly using SafeAreaView and Animated components */}
+        <Animated.View 
+          style={[
+            styles.contentContainer, 
+            { 
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }] 
+            }
+          ]}
+        >
+          <Animated.Text style={styles.title}>
+            FilmFeast
+          </Animated.Text>
+          
+          <Button
+            style={styles.googleButton}
+            status="control"
+            accessoryLeft={GoogleLogo}
+            onPress={() => onGoogleButtonPress(navigation)}
+          >
+            Get Started with Google
+          </Button>
+          
+          <Button
+            style={styles.howItWorksButton}
+            appearance="ghost"
+            status="basic"
+            onPress={() => navigation.navigate('Instructions')}
+          >
+            How It Works?
+          </Button>
+        </Animated.View>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -104,15 +142,17 @@ function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={FilmFeast} />
-        <Stack.Screen name="Instructions" component={InstructionsScreen} />
-        <Stack.Screen name="Dashboard" component={Dashboard} />
-        <Stack.Screen name="SwipingScreen" component={SwipingScreen} />
-        <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <ApplicationProvider {...eva} theme={eva.dark}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Home" component={FilmFeast} />
+          <Stack.Screen name="Instructions" component={InstructionsScreen} />
+          <Stack.Screen name="Dashboard" component={Dashboard} />
+          <Stack.Screen name="SwipingScreen" component={SwipingScreen} />
+          <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ApplicationProvider>
   );
 }
 
@@ -121,8 +161,6 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: 'cover',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -131,53 +169,43 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
-  content: {
+  contentContainer: {
     alignItems: 'center',
-    paddingHorizontal: 20,
+    width: '85%',
+    maxWidth: 350,
   },
   title: {
     fontSize: 60,
     fontWeight: 'bold',
-    marginBottom: 40,
+    marginBottom: 60,
     color: '#ffcc00',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 4, height: 4 },
     textShadowRadius: 10,
+    textAlign: 'center',
   },
   googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    borderRadius: 30,
+    width: '100%',
+    marginBottom: 20,
     paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: 'transparent',
     shadowColor: '#000',
-    shadowOffset: { width: 3, height: 3 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-    marginBottom: 15,
+    shadowRadius: 6,
+    elevation: 8,
   },
   googleLogo: {
     width: 24,
     height: 24,
     marginRight: 10,
   },
-  googleButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
   howItWorksButton: {
-    marginTop: 20,
-    padding: 10,
-  },
-  howItWorksText: {
-    fontSize: 18,
-    color: '#fff',
-    textDecorationLine: 'underline',
+    marginTop: 15,
+    borderColor: 'transparent',
   },
 });
 

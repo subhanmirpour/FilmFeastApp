@@ -1,7 +1,7 @@
 // @ts-nocheck
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ImageBackground, Alert } from 'react-native';
+import { View, StyleSheet, Modal, ImageBackground, Alert } from 'react-native';
+import { Button, Text, Layout, Avatar, useTheme } from '@ui-kitten/components';
 import LinearGradient from 'react-native-linear-gradient';
 import { getAuth, signOut } from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
@@ -12,18 +12,25 @@ function DashboardScreen() {
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
+  const theme = useTheme();
 
   useEffect(() => {
     const auth = getAuth();
     const currentUser = auth.currentUser;
 
     if (currentUser) {
-      const nameParts = currentUser.displayName ? currentUser.displayName.split(' ') : ["No Name", ""];
+      const nameParts = currentUser.displayName 
+        ? currentUser.displayName.split(' ') 
+        : ["No Name", ""];
+      
       setUser({
         firstName: nameParts[0],
-        lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : "Not Available",
+        lastName: nameParts.length > 1 
+          ? nameParts.slice(1).join(' ') 
+          : "Not Available",
         email: currentUser.email || "No Email",
-        photoURL: currentUser.photoURL || require('../assets/images/profile.jpg'),
+        photoURL: currentUser.photoURL 
+          || require('../assets/images/profile.jpg'),
       });
     }
   }, []);
@@ -32,7 +39,10 @@ function DashboardScreen() {
     const auth = getAuth();
     try {
       await signOut(auth);
-      Alert.alert("Logout Successful", "You have been logged out successfully.");
+      Alert.alert(
+        "Logout Successful", 
+        "You have been logged out successfully."
+      );
       navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Logout Failed", error.message);
@@ -41,85 +51,143 @@ function DashboardScreen() {
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
-      <LinearGradient colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']} style={styles.overlay} />
-      <View style={styles.container}>
-        {/* Profile Picture */}
-        <TouchableOpacity onPress={() => setSidebarVisible(true)} style={styles.profileContainer}>
-          <Image
-            source={user?.photoURL ? { uri: user.photoURL } : require('../assets/images/profile.jpg')}
-            style={styles.profilePic}
-          />
-        </TouchableOpacity>
+      <LinearGradient 
+        colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']} 
+        style={styles.overlay} 
+      />
+      
+      <Layout style={styles.container}>
+        {/* Profile Avatar */}
+        <Button 
+          appearance="ghost" 
+          onPress={() => setSidebarVisible(true)}
+          style={styles.profileContainer}
+          accessoryLeft={() => (
+            <Avatar
+              source={user?.photoURL 
+                ? { uri: user.photoURL } 
+                : require('../assets/images/profile.jpg')
+              }
+              style={styles.profilePic}
+            />
+          )}
+        />
 
-        {/* Sidebar Modal */}
+        {/* User Sidebar Modal */}
         <Modal
           animationType="slide"
           transparent={true}
           visible={isSidebarVisible}
           onRequestClose={() => setSidebarVisible(false)}
         >
-          <View style={styles.sidebar}>
-            <View style={styles.sidebarHeader}>
-              <Image source={{ uri: user?.photoURL }} style={styles.userImage} />
-              <Text style={styles.sidebarTitle}>
+          <Layout style={styles.sidebar}>
+            {/* User Profile Section */}
+            <Layout style={styles.sidebarHeader}>
+              <Avatar
+                source={{ uri: user?.photoURL }} 
+                style={styles.userImage}
+              />
+              <Text category="h5" style={styles.sidebarTitle}>
                 {user ? `${user.firstName} ${user.lastName}` : 'Guest'}
               </Text>
-            </View>
-            <View style={styles.divider} />
+            </Layout>
+
+            <View 
+              style={[
+                styles.divider, 
+                { backgroundColor: theme['color-basic-500'] }
+              ]} 
+            />
+            
+            {/* User Info Section */}
             {user ? (
               <>
-                <View style={styles.infoContainer}>
-                  <Text style={styles.label}>First Name</Text>
-                  <Text style={styles.infoText}>{user.firstName}</Text>
-                </View>
-                <View style={styles.infoContainer}>
-                  <Text style={styles.label}>Last Name</Text>
-                  <Text style={styles.infoText}>{user.lastName}</Text>
-                </View>
-                <View style={styles.infoContainer}>
-                  <Text style={styles.label}>Email</Text>
-                  <Text style={styles.infoText}>{user.email}</Text>
-                </View>
+                <Layout style={styles.infoContainer}>
+                  <Text category="label" style={styles.labelText}>
+                    First Name
+                  </Text>
+                  <Text category="s1" style={styles.valueText}>
+                    {user.firstName}
+                  </Text>
+                </Layout>
+
+                <Layout style={styles.infoContainer}>
+                  <Text category="label" style={styles.labelText}>
+                    Last Name
+                  </Text>
+                  <Text category="s1" style={styles.valueText}>
+                    {user.lastName}
+                  </Text>
+                </Layout>
+
+                <Layout style={styles.infoContainer}>
+                  <Text category="label" style={styles.labelText}>
+                    Email
+                  </Text>
+                  <Text category="s1" style={styles.valueText}>
+                    {user.email}
+                  </Text>
+                </Layout>
               </>
             ) : (
-              <Text style={styles.sidebarText}>No User Logged In</Text>
+              <Text category="s1">No User Logged In</Text>
             )}
 
-            {/* Logout Button */}
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Text style={styles.logoutText}>Logout</Text>
-            </TouchableOpacity>
+            {/* Action Buttons */}
+            <Button 
+              status="danger" 
+              onPress={handleLogout}
+              style={styles.logoutButton}
+            >
+              Logout
+            </Button>
 
-            <TouchableOpacity onPress={() => setSidebarVisible(false)}>
-              <Text style={styles.closeButton}>Close</Text>
-            </TouchableOpacity>
-          </View>
+            <Button 
+              appearance="ghost" 
+              status="basic"
+              onPress={() => setSidebarVisible(false)}
+            >
+              Close
+            </Button>
+          </Layout>
         </Modal>
+        <Button
+            style={styles.howItWorksButton}
+            appearance="ghost"
+            status="basic"
+            onPress={() => navigation.navigate('Instructions')}
+          >
+            Instructions
+        </Button>
+        {/* Main Content */}
+        <Text category="h4" style={styles.title}>
+          Choose an Option:
+        </Text>
 
-        {/* Dashboard Options */}
-        <Text style={styles.title}>Choose an Option:</Text>
-        <TouchableOpacity
+        <Button
+          status="warning"
           style={styles.optionButton}
           onPress={() => navigation.navigate("SwipingScreen", { mode: "movie" })}
         >
-          <Text style={styles.optionText}>Help me decide Movie</Text>
-        </TouchableOpacity>
+          Help me decide Movie
+        </Button>
 
-        <TouchableOpacity
+        <Button
+          status="warning"
           style={styles.optionButton}
           onPress={() => navigation.navigate("SwipingScreen", { mode: "food" })}
         >
-          <Text style={styles.optionText}>Help me decide Food</Text>
-        </TouchableOpacity>
+          Help me decide Food
+        </Button>
 
-        <TouchableOpacity
+        <Button
+          status="warning"
           style={styles.optionButton}
           onPress={() => navigation.navigate("SwipingScreen", { mode: "both" })}
         >
-          <Text style={styles.optionText}>Help me decide Both</Text>
-        </TouchableOpacity>
-
-      </View>
+          Help me decide Both
+        </Button>
+      </Layout>
     </ImageBackground>
   );
 }
@@ -129,7 +197,6 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'center',
-    alignItems: 'center',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -139,114 +206,81 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: 'transparent',
   },
   profileContainer: {
     position: 'absolute',
-    top: 10,
-    right: -50,
+    top: 20,
+    right: 20,
+    padding: 10,
   },
   profilePic: {
-    width: 40,
-    height: 40,
-    borderRadius: 40,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#ffcc00',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
     color: '#ffcc00',
+    fontSize: 32,
+    fontWeight: 'bold',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 4, height: 4 },
-    textShadowRadius: 10,
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
   },
   optionButton: {
-    backgroundColor: '#ffcc00',
-    padding: 15,
-    borderRadius: 25,
-    marginVertical: 10,
-    width: '80%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  optionText: {
-    color: '#333',
-    fontSize: 18,
-    fontWeight: 'bold',
+    marginVertical: 15,
+    width: '85%',
+    borderRadius: 15,
+    minHeight: 60,
   },
   sidebar: {
     position: 'absolute',
     top: 0,
     right: 0,
-    width: '70%',
+    width: '80%',
     height: '100%',
-    backgroundColor: "silver",
     padding: 30,
     borderTopLeftRadius: 20,
     borderBottomLeftRadius: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
   },
   sidebarHeader: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   sidebarTitle: {
-    fontSize: 22,
+    marginTop: 15,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
   },
   divider: {
-    height: 1,
-    backgroundColor: '#ccc',
-    marginVertical: 20,
-  },
-  sidebarText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    height: 2,
+    marginVertical: 25,
   },
   userImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: '#ffcc00',
   },
   infoContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    color: '#888',
-  },
-  infoText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    marginBottom: 25,
   },
   logoutButton: {
-    backgroundColor: '#FF3B30',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 25,
+    minHeight: 50,
+    borderRadius: 12,
   },
-  logoutText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+  labelText: {
+    fontSize: 20,
+    color: '#666',
+    marginBottom: 8,
   },
-  closeButton: {
-    alignSelf: 'center',
-    fontSize: 16,
-    color: '#FF3B30',
-    fontWeight: 'bold',
+  valueText: {
+    fontSize: 24,
+    fontWeight: '600',
   },
 });
 
