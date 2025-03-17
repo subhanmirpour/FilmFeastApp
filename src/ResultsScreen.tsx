@@ -20,8 +20,10 @@ const ResultsScreen: React.FC = () => {
   useEffect(() => {
     const fetchRecommendation = async () => {
       try {
-        // Replace 'testUser' with your actual user ID
-        const movie = await getRecommendedMovie('testUser');
+        const [movie] = await Promise.all([
+          getRecommendedMovie('testUser'),
+          new Promise(resolve => setTimeout(resolve, 2000))
+        ]);
         setRecommendedMovie(movie);
       } catch (error) {
         console.error('Error fetching recommendation:', error);
@@ -39,6 +41,13 @@ const ResultsScreen: React.FC = () => {
         colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']}
         style={styles.overlay}
       />
+      
+      {loading && (
+        <Layout style={styles.loadingOverlay}>
+          <Text style={styles.loadingText}>Thinking of the perfect movie...</Text>
+        </Layout>
+      )}
+
       <Layout style={styles.container}>
         <TouchableOpacity
           style={styles.dashboardButton}
@@ -48,9 +57,7 @@ const ResultsScreen: React.FC = () => {
         </TouchableOpacity>
         <Text category="h5" style={styles.title}>Results</Text>
         <Layout style={styles.resultsContainer}>
-          {loading ? (
-            <Spinner status='warning' size='giant' />
-          ) : recommendedMovie ? (
+          {!loading && recommendedMovie ? (
             <>
               <Image
                 source={{ uri: `https://image.tmdb.org/t/p/w500${recommendedMovie.poster_path}` }}
@@ -60,7 +67,7 @@ const ResultsScreen: React.FC = () => {
                 {recommendedMovie.title || recommendedMovie.name}
               </Text>
             </>
-          ) : (
+          ) : !loading && (
             <Text category='h6' style={styles.placeholderText}>
               No recommendations found. Keep swiping!
             </Text>
@@ -88,6 +95,19 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'transparent',
   },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    zIndex: 999,
+  },
+  loadingText: {
+    fontSize: 24,
+    color: '#ffcc00',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   dashboardButton: {
     position: 'absolute',
     top: 20,
@@ -109,21 +129,23 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     height: SCREEN_WIDTH * 1.8,
     borderRadius: 20,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#222222',
-    padding: 20,
+    backgroundColor: 'transparent',
   },
   moviePoster: {
     width: '100%',
-    height: '80%',
-    resizeMode: 'contain',
-    borderRadius: 10,
+    height: 740,
+    borderRadius: 1
   },
   movieTitle: {
-    marginTop: 20,
-    color: '#ffcc00',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
     textAlign: 'center',
+    padding: 10,
+    backgroundColor: '#000000',
   },
   placeholderText: {
     fontSize: 24,
