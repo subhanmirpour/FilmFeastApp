@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Dimensions, ImageBackground, TouchableOpacity, Image } from 'react-native';
-import { Layout, Text, useTheme, Spinner } from '@ui-kitten/components';
+import { StyleSheet, Dimensions, ImageBackground, TouchableOpacity, Image, View } from 'react-native';
+import { Layout, Text, useTheme } from '@ui-kitten/components';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { getRecommendedItem } from '../services/recommendationService';
@@ -14,17 +14,29 @@ const ResultsScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
+
+  // When mode is 'both', recommendation is an object { movie, food }
+  // Otherwise, it's a single item.
   const [recommendation, setRecommendation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRecommendation = async () => {
       try {
-        const [item] = await Promise.all([
-          getRecommendedItem('testUser', mode),
-          new Promise(resolve => setTimeout(resolve, 2000))
-        ]);
-        setRecommendation(item);
+        // Wait 2 seconds for the loading effect
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        if (mode === 'both') {
+          // Fetch movie and food recommendations in parallel
+          const [movie, food] = await Promise.all([
+            getRecommendedItem('testUser', 'movie'),
+            getRecommendedItem('testUser', 'food')
+          ]);
+          setRecommendation({ movie, food });
+        } else {
+          const item = await getRecommendedItem('testUser', mode);
+          setRecommendation(item);
+        }
       } catch (error) {
         console.error('Error fetching recommendation:', error);
       } finally {
@@ -39,12 +51,14 @@ const ResultsScreen: React.FC = () => {
     switch (mode) {
       case 'movie': return 'Thinking of the perfect movie...';
       case 'food': return 'Finding your ideal meal...';
-      default: return 'Crafting your recommendation...';
+      case 'both': return 'Crafting your recommendation...';
+      default: return 'Loading...';
     }
   };
 
-  const isMovie = recommendation?.poster_path;
-  const isFood = recommendation?.image;
+  // For movie or food mode, check as before.
+  const isMovie = recommendation?.poster_path || (mode === 'both' && recommendation?.movie?.poster_path);
+  const isFood = recommendation?.image || (mode === 'both' && recommendation?.food?.image);
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
@@ -69,34 +83,68 @@ const ResultsScreen: React.FC = () => {
         <Text category="h5" style={styles.title}>Results</Text>
         <Layout style={styles.resultsContainer}>
           {!loading && recommendation ? (
-            <>
-              {isMovie && (
-                <>
-                  <Image
-                    source={{ uri: `https://image.tmdb.org/t/p/w500${recommendation.poster_path}` }}
-                    style={styles.recommendationImage}
-                  />
-                  <Text category='h4' style={styles.recommendationTitle}>
-                    {recommendation.title || recommendation.name}
-                  </Text>
-                </>
-              )}
-              {isFood && (
-                <>
-                  <Image
-                    source={recommendation.image}  // no { uri: ... } wrapper
-                    style={styles.recommendationImage}
-                  />
-
-                  <Text category='h4' style={styles.recommendationTitle}>
-                    {recommendation.name}
-                  </Text>
-                  <Text category='s1' style={styles.foodDescription}>
-                    {recommendation.description}
-                  </Text>
-                </>
-              )}
-            </>
+            mode === 'both' ? (
+              <>
+                {/* Composite Message */}
+                <Text category="h4" style={styles.compositeText}>
+                  You should watch "{recommendation.movie?.title || recommendation.movie?.name}" and this food would go perfectly with it "{recommendation.food?.name}"
+                </Text>
+                <View style={styles.bothContainer}>
+                  {/* Movie */}
+                  {recommendation.movie && (
+                    <View style={styles.itemContainer}>
+                      <Image
+                        source={{ uri: `https://image.tmdb.org/t/p/w500${recommendation.movie.poster_path}` }}
+                        style={styles.recommendationImage}
+                      />
+                      <Text category="h6" style={styles.itemTitle}>
+                        {recommendation.movie.title || recommendation.movie.name}
+                      </Text>
+                    </View>
+                  )}
+                  {/* Food */}
+                  {recommendation.food && (
+                    <View style={styles.itemContainer}>
+                      <Image
+                        source={recommendation.food.image}  // local image; no uri wrapper
+                        style={styles.recommendationImage}
+                      />
+                      <Text category="h6" style={styles.itemTitle}>
+                        {recommendation.food.name}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </>
+            ) : (
+              <>
+                {isMovie && (
+                  <>
+                    <Image
+                      source={{ uri: `https://image.tmdb.org/t/p/w500${recommendation.poster_path}` }}
+                      style={styles.recommendationImage}
+                    />
+                    <Text category='h4' style={styles.recommendationTitle}>
+                      {recommendation.title || recommendation.name}
+                    </Text>
+                  </>
+                )}
+                {isFood && (
+                  <>
+                    <Image
+                      source={recommendation.image}  // local image
+                      style={styles.recommendationImage}
+                    />
+                    <Text category='h4' style={styles.recommendationTitle}>
+                      {recommendation.name}
+                    </Text>
+                    <Text category='s1' style={styles.foodDescription}>
+                      {recommendation.description}
+                    </Text>
+                  </>
+                )}
+              </>
+            )
           ) : !loading && (
             <Text category='h6' style={styles.placeholderText}>
               No recommendations found. Keep swiping!
@@ -107,6 +155,7 @@ const ResultsScreen: React.FC = () => {
     </ImageBackground>
   );
 };
+
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -163,25 +212,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
-  moviePoster: {
-    width: '100%',
-    height: 740,
-    borderRadius: 1
-  },
-  movieTitle: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    textAlign: 'center',
-    padding: 10,
-    backgroundColor: '#000000',
-  },
-  placeholderText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ffcc00',
-    textAlign: 'center',
-  },
   recommendationImage: {
     width: '100%',
     height: '70%',
@@ -199,6 +229,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     padding: 15,
     fontSize: 16,
+  },
+  placeholderText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffcc00',
+    textAlign: 'center',
+  },
+  compositeText: {
+    fontSize: 20,
+    color: '#ffcc00',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  bothContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  itemContainer: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  itemTitle: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#ffcc00',
+    textAlign: 'center',
   },
 });
 
