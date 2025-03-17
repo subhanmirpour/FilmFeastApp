@@ -179,22 +179,22 @@ const SwipingScreen: React.FC = () => {
     }
 
     pan.setValue({ x: 0, y: 0 });
-    setCurrentIndex(prevIndex => {
-      const newIndex = prevIndex + 1;
-      if ((mode === 'movie' || mode === 'food') && newIndex >= 5) {
+    
+    // Compute new index and update state
+    const newIndex = currentIndexRef.current + 1;
+    setCurrentIndex(newIndex);
+
+    // If we have reached the limit, navigate outside of the state updater using setTimeout.
+    if (
+      ((mode === 'movie' || mode === 'food') && newIndex >= 5) ||
+      (mode === 'both' && newIndex >= 10) ||
+      (newIndex >= itemsRef.current.length)
+    ) {
+      setTimeout(() => {
         navigation.navigate("ResultsScreen", { mode });
-        return newIndex;
-      }
-      if (mode === 'both' && newIndex >= 10) {
-        navigation.navigate("ResultsScreen", { mode });
-        return newIndex;
-      }
-      if (newIndex >= itemsRef.current.length) {
-        navigation.navigate("ResultsScreen", { mode });
-        return prevIndex;
-      }
-      return newIndex;
-    });
+      }, 0);
+    }
+
     swipeInProgress.current = false;
   };
 

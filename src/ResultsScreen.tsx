@@ -4,7 +4,7 @@ import { StyleSheet, Dimensions, ImageBackground, TouchableOpacity, Image } from
 import { Layout, Text, useTheme, Spinner } from '@ui-kitten/components';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { getRecommendedMovie } from '../services/recommendationService';
+import { getRecommendedItem } from '../services/recommendationService';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const backgroundImage = require('../assets/images/redchair.jpg');
@@ -14,17 +14,17 @@ const ResultsScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
-  const [recommendedMovie, setRecommendedMovie] = useState<any>(null);
+  const [recommendation, setRecommendation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRecommendation = async () => {
       try {
-        const [movie] = await Promise.all([
-          getRecommendedMovie('testUser'),
+        const [item] = await Promise.all([
+          getRecommendedItem('testUser', mode),
           new Promise(resolve => setTimeout(resolve, 2000))
         ]);
-        setRecommendedMovie(movie);
+        setRecommendation(item);
       } catch (error) {
         console.error('Error fetching recommendation:', error);
       } finally {
@@ -33,7 +33,18 @@ const ResultsScreen: React.FC = () => {
     };
 
     fetchRecommendation();
-  }, []);
+  }, [mode]);
+
+  const getLoadingText = () => {
+    switch (mode) {
+      case 'movie': return 'Thinking of the perfect movie...';
+      case 'food': return 'Finding your ideal meal...';
+      default: return 'Crafting your recommendation...';
+    }
+  };
+
+  const isMovie = recommendation?.poster_path;
+  const isFood = recommendation?.image;
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
@@ -41,10 +52,10 @@ const ResultsScreen: React.FC = () => {
         colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)']}
         style={styles.overlay}
       />
-      
+
       {loading && (
         <Layout style={styles.loadingOverlay}>
-          <Text style={styles.loadingText}>Thinking of the perfect movie...</Text>
+          <Text style={styles.loadingText}>{getLoadingText()}</Text>
         </Layout>
       )}
 
@@ -57,15 +68,34 @@ const ResultsScreen: React.FC = () => {
         </TouchableOpacity>
         <Text category="h5" style={styles.title}>Results</Text>
         <Layout style={styles.resultsContainer}>
-          {!loading && recommendedMovie ? (
+          {!loading && recommendation ? (
             <>
-              <Image
-                source={{ uri: `https://image.tmdb.org/t/p/w500${recommendedMovie.poster_path}` }}
-                style={styles.moviePoster}
-              />
-              <Text category='h4' style={styles.movieTitle}>
-                {recommendedMovie.title || recommendedMovie.name}
-              </Text>
+              {isMovie && (
+                <>
+                  <Image
+                    source={{ uri: `https://image.tmdb.org/t/p/w500${recommendation.poster_path}` }}
+                    style={styles.recommendationImage}
+                  />
+                  <Text category='h4' style={styles.recommendationTitle}>
+                    {recommendation.title || recommendation.name}
+                  </Text>
+                </>
+              )}
+              {isFood && (
+                <>
+                  <Image
+                    source={recommendation.image}  // no { uri: ... } wrapper
+                    style={styles.recommendationImage}
+                  />
+
+                  <Text category='h4' style={styles.recommendationTitle}>
+                    {recommendation.name}
+                  </Text>
+                  <Text category='s1' style={styles.foodDescription}>
+                    {recommendation.description}
+                  </Text>
+                </>
+              )}
             </>
           ) : !loading && (
             <Text category='h6' style={styles.placeholderText}>
@@ -77,7 +107,6 @@ const ResultsScreen: React.FC = () => {
     </ImageBackground>
   );
 };
-
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -152,6 +181,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffcc00',
     textAlign: 'center',
+  },
+  recommendationImage: {
+    width: '100%',
+    height: '70%',
+    resizeMode: 'cover',
+    borderRadius: 10,
+  },
+  recommendationTitle: {
+    marginTop: 20,
+    color: '#ffcc00',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  foodDescription: {
+    color: '#ffffff',
+    textAlign: 'center',
+    padding: 15,
+    fontSize: 16,
   },
 });
 
