@@ -114,26 +114,28 @@ const SwipingScreen: React.FC = () => {
       ),
       onPanResponderRelease: (e, gestureState) => {
         if (swipeInProgress.current) return;
-
+        
+        // Determine the swipe action based on the current item type (movie vs. food)
+        const currentItem = itemsRef.current[currentIndexRef.current];
         let swipeAction = null;
         if (gestureState.dx > 120) {
-          swipeAction = "wantToWatch";
+          swipeAction = currentItem && currentItem.poster_path ? "wantToWatch" : "wantToEat";
         } else if (gestureState.dx < -120) {
-          swipeAction = "dontWantToWatch";
+          swipeAction = currentItem && currentItem.poster_path ? "dontWantToWatch" : "dontWantToEat";
         } else if (gestureState.dy < -120) {
-          swipeAction = "Skip";
+          swipeAction = "skip";
         }
 
         if (swipeAction) {
           swipeInProgress.current = true;
           Animated.timing(pan, {
             toValue: {
-              x: swipeAction === "wantToWatch"
-                ? SCREEN_WIDTH
-                : swipeAction === "dontWantToWatch"
-                  ? -SCREEN_WIDTH
-                  : 0,
-              y: swipeAction === "Skip" ? -SCREEN_WIDTH : 0
+              x: (swipeAction === "wantToWatch" || swipeAction === "wantToEat") 
+                  ? SCREEN_WIDTH 
+                  : (swipeAction === "dontWantToWatch" || swipeAction === "dontWantToEat") 
+                    ? -SCREEN_WIDTH 
+                    : 0,
+              y: swipeAction === "skip" ? -SCREEN_WIDTH : 0
             },
             duration: 300,
             useNativeDriver: false
@@ -150,7 +152,7 @@ const SwipingScreen: React.FC = () => {
     })
   ).current;
 
-  // Advance to the next item and log the swiped item in Firestore using the modular API.
+  // Advance to the next item and log the swiped item in Firestore.
   const goToNextItem = async (swipeAction: string) => {
     const currentItem = itemsRef.current[currentIndexRef.current];
     if (currentItem) {

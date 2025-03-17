@@ -1,9 +1,10 @@
 // @ts-nocheck
-import React from 'react';
-import { StyleSheet, Dimensions, ImageBackground, TouchableOpacity } from 'react-native';
-import { Layout, Text, useTheme } from '@ui-kitten/components';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Dimensions, ImageBackground, TouchableOpacity, Image } from 'react-native';
+import { Layout, Text, useTheme, Spinner } from '@ui-kitten/components';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import { getRecommendedMovie } from '../services/recommendationService';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const backgroundImage = require('../assets/images/redchair.jpg');
@@ -13,6 +14,24 @@ const ResultsScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
+  const [recommendedMovie, setRecommendedMovie] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecommendation = async () => {
+      try {
+        // Replace 'testUser' with your actual user ID
+        const movie = await getRecommendedMovie('testUser');
+        setRecommendedMovie(movie);
+      } catch (error) {
+        console.error('Error fetching recommendation:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecommendation();
+  }, []);
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
@@ -29,9 +48,23 @@ const ResultsScreen: React.FC = () => {
         </TouchableOpacity>
         <Text category="h5" style={styles.title}>Results</Text>
         <Layout style={styles.resultsContainer}>
-          <Text category="h6" style={styles.placeholderText}>
-            Your recommendations will appear here. (Mode: {mode})
-          </Text>
+          {loading ? (
+            <Spinner status='warning' size='giant' />
+          ) : recommendedMovie ? (
+            <>
+              <Image
+                source={{ uri: `https://image.tmdb.org/t/p/w500${recommendedMovie.poster_path}` }}
+                style={styles.moviePoster}
+              />
+              <Text category='h4' style={styles.movieTitle}>
+                {recommendedMovie.title || recommendedMovie.name}
+              </Text>
+            </>
+          ) : (
+            <Text category='h6' style={styles.placeholderText}>
+              No recommendations found. Keep swiping!
+            </Text>
+          )}
         </Layout>
       </Layout>
     </ImageBackground>
@@ -79,11 +112,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#222222',
+    padding: 20,
+  },
+  moviePoster: {
+    width: '100%',
+    height: '80%',
+    resizeMode: 'contain',
+    borderRadius: 10,
+  },
+  movieTitle: {
+    marginTop: 20,
+    color: '#ffcc00',
+    textAlign: 'center',
   },
   placeholderText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ffcc00',
+    textAlign: 'center',
   },
 });
 
