@@ -241,8 +241,8 @@ const SwipingScreen: React.FC = () => {
 
   // Choose emoji based on the item type (movie vs. food)
   const likeEmoji = currentItem && currentItem.poster_path ? "❤️" : "😋";
-  const dislikeEmoji = currentItem && currentItem.poster_path ? "👎" : "🤢";
-  const skipEmoji = "⏭️";
+  const dislikeEmoji = currentItem && currentItem.poster_path ? "👎" : "☹️";
+  const skipEmoji = "❌";
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   emoji: {
     position: 'absolute',
-    fontSize: 150,
+    fontSize: 200,
     zIndex: 10,
   }
 });

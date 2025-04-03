@@ -16,7 +16,7 @@ const tmdbApi = {
             sort_by: 'popularity.desc',
             include_adult: false,
             include_video: false,
-            'vote_count.gte': 1000, // ensures the movie is well-known
+            'vote_count.gte': 500, // ensures the movie is well-known
             with_original_language: 'en',
             page: page.toString(),
           },
