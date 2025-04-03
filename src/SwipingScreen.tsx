@@ -79,15 +79,15 @@ const SwipingScreen: React.FC = () => {
         const moviesData = response.results || response;
         fetchedItems = shuffleArray(moviesData);
       } else if (mode === 'food') {
-        fetchedItems = getRandomFoods().slice(0, 5);
+        fetchedItems = getRandomFoods().slice(0, 10);
       } else if (mode === 'both') {
         let moviesItems: any[] = [];
         const response = await tmdbApi.getPopularMovies();
         const moviesData = response.results || response;
         if (moviesData.length > 0) {
-          moviesItems = shuffleArray(moviesData).slice(0, 5);
+          moviesItems = shuffleArray(moviesData).slice(0, 10);
         }
-        const foodItems = getRandomFoods().slice(0, 5);
+        const foodItems = getRandomFoods().slice(0, 10);
         fetchedItems = [...moviesItems, ...foodItems];
       }
 
@@ -186,8 +186,8 @@ const SwipingScreen: React.FC = () => {
 
     // If we have reached the limit, navigate outside of the state updater using setTimeout.
     if (
-      ((mode === 'movie' || mode === 'food') && newIndex >= 5) ||
-      (mode === 'both' && newIndex >= 10) ||
+      ((mode === 'movie' || mode === 'food') && newIndex >= 10) ||
+      (mode === 'both' && newIndex >= 20) ||
       (newIndex >= itemsRef.current.length)
     ) {
       setTimeout(() => {
@@ -363,7 +363,6 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     height: SCREEN_WIDTH * 1.8,
     borderRadius: 20,
-    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',

@@ -26,7 +26,6 @@ export const foodList = [
   { name: 'Empanada', image: require('../assets/food/empanada.jpg') },
   { name: 'Jollof Rice', image: require('../assets/food/jollofrice.jpg') },
   { name: 'Tagine', image: require('../assets/food/tagine.jpg') },
-  { name: 'kimchi', image: require('../assets/food/kimchi.jpg') },
   { name: 'Okonomiyaki', image: require('../assets/food/okonomiyaki.jpg') },
   { name: 'Gnocchi', image: require('../assets/food/gnocchi.jpg') },
   { name: 'Pierogi', image: require('../assets/food/pierogi.jpg') },
