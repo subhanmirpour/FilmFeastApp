@@ -8,6 +8,7 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import {
   Text,
@@ -53,12 +54,16 @@ const SwipingScreen: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [swipedItems, setSwipedItems] = useState<any[]>([]);
+  const [isBreak, setIsBreak] = useState(false);
 
   const pan = useRef(new Animated.ValueXY()).current;
   const swipeInProgress = useRef(false);
 
   const itemsRef = useRef(items);
   const currentIndexRef = useRef(currentIndex);
+
+  // Animated value for pulsing break text
+  const breakScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     itemsRef.current = items;
@@ -67,6 +72,20 @@ const SwipingScreen: React.FC = () => {
   useEffect(() => {
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
+
+  // Trigger pulsing animation when break is active
+  useEffect(() => {
+    if (isBreak) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(breakScale, { toValue: 1.1, duration: 500, useNativeDriver: true }),
+          Animated.timing(breakScale, { toValue: 1, duration: 500, useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      breakScale.setValue(1);
+    }
+  }, [isBreak]);
 
   // Fetch items based on the mode
   useEffect(() => {
@@ -107,13 +126,13 @@ const SwipingScreen: React.FC = () => {
   // Create PanResponder for swipe gestures
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => !isBreak,
       onPanResponderMove: Animated.event(
         [null, { dx: pan.x, dy: pan.y }],
         { useNativeDriver: false }
       ),
       onPanResponderRelease: (e, gestureState) => {
-        if (swipeInProgress.current) return;
+        if (swipeInProgress.current || isBreak) return;
         
         // Determine the swipe action based on the current item type (movie vs. food)
         const currentItem = itemsRef.current[currentIndexRef.current];
@@ -182,9 +201,20 @@ const SwipingScreen: React.FC = () => {
     
     // Compute new index and update state
     const newIndex = currentIndexRef.current + 1;
-    setCurrentIndex(newIndex);
 
-    // If we have reached the limit, navigate outside of the state updater using setTimeout.
+    // For 'both' mode, if movies are done (10 swipes), trigger a break overlay.
+    if (mode === 'both' && newIndex === 10) {
+      setIsBreak(true);
+      setCurrentIndex(newIndex);
+      // Pause for 2 seconds with break animation
+      setTimeout(() => {
+        setIsBreak(false);
+      }, 2000);
+    } else {
+      setCurrentIndex(newIndex);
+    }
+
+    // If we have reached the limit, navigate outside of the state updater.
     if (
       ((mode === 'movie' || mode === 'food') && newIndex >= 10) ||
       (mode === 'both' && newIndex >= 20) ||
@@ -261,6 +291,12 @@ const SwipingScreen: React.FC = () => {
         <Layout style={styles.swipeContainer}>
           {loading ? (
             <Spinner status='warning' size='giant' />
+          ) : isBreak ? (
+            <View style={styles.breakContainer}>
+              <Animated.Text style={[styles.breakText, { transform: [{ scale: breakScale }] }]}>
+                Now time to swipe food
+              </Animated.Text>
+            </View>
           ) : items.length > 0 && currentIndex < items.length ? (
             <Animated.View
               key={currentIndex}
@@ -334,7 +370,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject
+    ...StyleSheet.absoluteFillObject,
   },
   container: {
     flex: 1,
@@ -391,7 +427,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     fontSize: 200,
     zIndex: 10,
-  }
+  },
+  breakContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 20,
+  },
+  breakText: {
+    fontSize: 28,
+    color: '#ffffff',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(255, 204, 0, 0.8)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+  },
 });
 
 export default SwipingScreen;
