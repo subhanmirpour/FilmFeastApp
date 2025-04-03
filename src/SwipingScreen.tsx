@@ -204,6 +204,46 @@ const SwipingScreen: React.FC = () => {
     : currentItem?.image;
   const titleText = currentItem?.title || currentItem?.name;
 
+  // Animated emoji effects for left/right swipes
+  const likeOpacity = pan.x.interpolate({
+    inputRange: [0, 120],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+  const dislikeOpacity = pan.x.interpolate({
+    inputRange: [-120, 0],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const likeScale = pan.x.interpolate({
+    inputRange: [0, 120],
+    outputRange: [0.5, 2],
+    extrapolate: 'clamp',
+  });
+  const dislikeScale = pan.x.interpolate({
+    inputRange: [-120, 0],
+    outputRange: [2, 0.5],
+    extrapolate: 'clamp',
+  });
+
+  // Animated emoji effects for vertical swipe (skip)
+  const skipOpacity = pan.y.interpolate({
+    inputRange: [-120, 0],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+  const skipScale = pan.y.interpolate({
+    inputRange: [-120, 0],
+    outputRange: [2, 0.5],
+    extrapolate: 'clamp',
+  });
+
+  // Choose emoji based on the item type (movie vs. food)
+  const likeEmoji = currentItem && currentItem.poster_path ? "❤️" : "😋";
+  const dislikeEmoji = currentItem && currentItem.poster_path ? "👎" : "🤢";
+  const skipEmoji = "⏭️";
+
   return (
     <ImageBackground source={backgroundImage} style={styles.background}>
       <LinearGradient
@@ -227,6 +267,40 @@ const SwipingScreen: React.FC = () => {
               style={[styles.card, pan.getLayout()]}
               {...panResponder.panHandlers}
             >
+              {/* Emoji overlays */}
+              <Animated.Text style={[
+                styles.emoji,
+                {
+                  left: 20,
+                  top: 20,
+                  opacity: likeOpacity,
+                  transform: [{ scale: likeScale }, { rotate: '10deg' }],
+                }
+              ]}>
+                {likeEmoji}
+              </Animated.Text>
+              <Animated.Text style={[
+                styles.emoji,
+                {
+                  right: 20,
+                  top: 20,
+                  opacity: dislikeOpacity,
+                  transform: [{ scale: dislikeScale }, { rotate: '-10deg' }],
+                }
+              ]}>
+                {dislikeEmoji}
+              </Animated.Text>
+              <Animated.Text style={[
+                styles.emoji,
+                {
+                  top: 20,
+                  alignSelf: 'center',
+                  opacity: skipOpacity,
+                  transform: [{ scale: skipScale }],
+                }
+              ]}>
+                {skipEmoji}
+              </Animated.Text>
               <Image
                 source={
                   imageSource || {
@@ -313,6 +387,11 @@ const styles = StyleSheet.create({
     width: '100%',
     textAlign: 'center',
     padding: 10,
+  },
+  emoji: {
+    position: 'absolute',
+    fontSize: 150,
+    zIndex: 10,
   }
 });
 
