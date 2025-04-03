@@ -15,19 +15,15 @@ const ResultsScreen: React.FC = () => {
   const route = useRoute();
   const { mode } = route.params as { mode: 'movie' | 'food' | 'both' };
 
-  // When mode is 'both', recommendation is an object { movie, food }
-  // Otherwise, it's a single item.
   const [recommendation, setRecommendation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRecommendation = async () => {
       try {
-        // Wait 2 seconds for the loading effect
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         if (mode === 'both') {
-          // Fetch movie and food recommendations in parallel
           const [movie, food] = await Promise.all([
             getRecommendedItem('testUser', 'movie'),
             getRecommendedItem('testUser', 'food')
@@ -56,7 +52,6 @@ const ResultsScreen: React.FC = () => {
     }
   };
 
-  // For movie or food mode, check as before.
   const isMovie = recommendation?.poster_path || (mode === 'both' && recommendation?.movie?.poster_path);
   const isFood = recommendation?.image || (mode === 'both' && recommendation?.food?.image);
 
@@ -85,12 +80,12 @@ const ResultsScreen: React.FC = () => {
           {!loading && recommendation ? (
             mode === 'both' ? (
               <>
-                {/* Composite Message */}
-                <Text category="h4" style={styles.compositeText}>
-                  You should watch "{recommendation.movie?.title || recommendation.movie?.name}" and this food would go perfectly with it "{recommendation.food?.name}"
-                </Text>
+                <View style={styles.compositeContainer}>
+                  <Text category="h4" style={styles.compositeText}>
+                    You should watch "{recommendation.movie?.title || recommendation.movie?.name}" and this food would go perfectly with it "{recommendation.food?.name}"
+                  </Text>
+                </View>
                 <View style={styles.bothContainer}>
-                  {/* Movie */}
                   {recommendation.movie && (
                     <View style={styles.itemContainer}>
                       <Image
@@ -102,11 +97,10 @@ const ResultsScreen: React.FC = () => {
                       </Text>
                     </View>
                   )}
-                  {/* Food */}
                   {recommendation.food && (
                     <View style={styles.itemContainer}>
                       <Image
-                        source={recommendation.food.image}  // local image; no uri wrapper
+                        source={recommendation.food.image}
                         style={styles.recommendationImage}
                       />
                       <Text category="h6" style={styles.itemTitle}>
@@ -132,7 +126,7 @@ const ResultsScreen: React.FC = () => {
                 {isFood && (
                   <>
                     <Image
-                      source={recommendation.image}  // local image
+                      source={recommendation.image}
                       style={styles.recommendationImage}
                     />
                     <Text category='h4' style={styles.recommendationTitle}>
@@ -205,16 +199,15 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     width: SCREEN_WIDTH,
-    height: SCREEN_WIDTH * 1.8,
+    height: SCREEN_WIDTH * 2,
     borderRadius: 20,
-    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
   recommendationImage: {
     width: '100%',
-    height: '70%',
+    height: '80%',
     resizeMode: 'cover',
     borderRadius: 10,
   },
@@ -236,12 +229,21 @@ const styles = StyleSheet.create({
     color: '#ffcc00',
     textAlign: 'center',
   },
+  compositeContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    width: '95%',
+    alignSelf: 'center',
+  },
   compositeText: {
     fontSize: 20,
-    color: '#ffcc00',
+    color: '#ffffff',
     textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   bothContainer: {
     flexDirection: 'row',
