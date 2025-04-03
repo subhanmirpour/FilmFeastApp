@@ -189,11 +189,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   dashboardButtonText: {
+    marginTop: 10,
     fontSize: 18,
     color: '#ffcc00',
     fontWeight: 'bold',
   },
   title: {
+    marginTop: 20,
     marginBottom: 20,
     color: '#ffcc00',
   },
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   recommendationTitle: {
-    marginTop: 20,
+    marginTop: 10,
     color: '#ffcc00',
     textAlign: 'center',
     paddingHorizontal: 10,

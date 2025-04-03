@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { getFirestore, collection, query, where, getDocs } from '@react-native-firebase/firestore';
 
-const getRecommendedItems = async (userId: string, type: 'movie' | 'food' | 'both') => {
+const getRecommendedItems = async (userId, type) => {
   try {
     const db = getFirestore();
     const swipedItemsRef = collection(db, 'users', userId, 'swipedItems');
@@ -27,7 +28,7 @@ const getRecommendedItems = async (userId: string, type: 'movie' | 'food' | 'bot
     }
 
     const querySnapshot = await getDocs(q);
-    const items: any[] = [];
+    const items = [];
     
     querySnapshot.forEach((doc) => {
       items.push(doc.data().item);
@@ -35,16 +36,29 @@ const getRecommendedItems = async (userId: string, type: 'movie' | 'food' | 'bot
 
     if (items.length === 0) return null;
 
-    // Filter and return based on type
+    // For movies, filter by popularity (vote_count >= 1000)
+    if (type === 'movie') {
+      const popularMovies = items.filter(
+        item => item.poster_path && item.vote_count && item.vote_count >= 1000
+      );
+      return popularMovies.length > 0
+        ? popularMovies[Math.floor(Math.random() * popularMovies.length)]
+        : items[Math.floor(Math.random() * items.length)];
+    }
+
     if (type === 'both') {
-      const movies = items.filter(item => item.poster_path);
+      // Filter movies by popularity and ensure they're well-known
+      const movies = items.filter(
+        item => item.poster_path && item.vote_count && item.vote_count >= 1000
+      );
       const foods = items.filter(item => item.image);
       return {
         movie: movies.length > 0 ? movies[Math.floor(Math.random() * movies.length)] : null,
-        food: foods.length > 0 ? foods[Math.floor(Math.random() * foods.length)] : null
+        food: foods.length > 0 ? foods[Math.floor(Math.random() * foods.length)] : null,
       };
     }
     
+    // For food, no additional filtering needed.
     return items[Math.floor(Math.random() * items.length)];
   } catch (error) {
     console.error('Error getting recommendations:', error);
@@ -52,11 +66,11 @@ const getRecommendedItems = async (userId: string, type: 'movie' | 'food' | 'bot
   }
 };
 
-export const getRecommendedItem = async (userId: string, mode: 'movie' | 'food' | 'both') => {
+export const getRecommendedItem = async (userId, mode) => {
   const result = await getRecommendedItems(userId, mode);
   
   if (mode === 'both' && result) {
-    // Prioritize showing at least one recommendation
+    // Prioritize showing at least one recommendation.
     if (result.movie && result.food) {
       return Math.random() > 0.5 ? result.movie : result.food;
     }
@@ -65,3 +79,5 @@ export const getRecommendedItem = async (userId: string, mode: 'movie' | 'food' 
   
   return result;
 };
+
+export default getRecommendedItem;

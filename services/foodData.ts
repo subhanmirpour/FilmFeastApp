@@ -35,7 +35,6 @@ export const foodList = [
   { name: 'Khachapuri', image: require('../assets/food/khachapuri.jpg') },
   { name: 'Tamales', image: require('../assets/food/tamales.jpg') },
   { name: 'Katsu Curry', image: require('../assets/food/katsucurry.jpg') },
-  { name: 'Mofongo', image: require('../assets/food/mofongo.jpg') },
   { name: 'Chilaquiles', image: require('../assets/food/chilaquiles.jpg') },
   { name: 'Cacio e Pepe', image: require('../assets/food/cacioePepe.jpg') },
   { name: 'Laksa', image: require('../assets/food/laksa.jpg') },
